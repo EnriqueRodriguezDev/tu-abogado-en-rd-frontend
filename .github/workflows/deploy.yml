@@ -24,10 +24,10 @@ jobs:
           # Using 'docker compose' (v2). If your server uses v1, change to 'docker-compose'
           
           echo "⬇️  Stopping containers..."
-          docker-compose down --remove-orphans || true
+          sudo docker-compose down --remove-orphans || true
           
           echo "🏗️  Building and Starting..."
-          docker-compose up -d --build
+          sudo docker-compose up -d --build
           
           echo "🧹 Pruning unused images..."
           docker image prune -f

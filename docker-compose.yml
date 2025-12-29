@@ -1,7 +1,7 @@
 services:
-  app:
-    build: .
+  frontend:
+    build: ./frontend
     ports:
-      - "3000:80"
-    restart: unless-stopped
-    container_name: tu-abogado-en-rd
+      - "80:80"
+    restart: always
+    container_name: tu-abogado-frontend
