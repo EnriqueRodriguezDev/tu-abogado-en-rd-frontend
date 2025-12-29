@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Plus, Trash2, Edit, X, Briefcase, Image as ImageIcon, Loader2, DollarSign, FileText, Type } from 'lucide-react';
+import { Plus, Trash2, Edit, X, Briefcase, Image as ImageIcon, Loader2, DollarSign, FileText, Type, Sparkles, Scale, Gavel, Shield, Users, Landmark } from 'lucide-react';
 
 const ServicesManager = () => {
     const [services, setServices] = useState<any[]>([]);
@@ -28,8 +28,6 @@ const ServicesManager = () => {
             const objectUrl = URL.createObjectURL(formImage);
             setImagePreview(objectUrl);
             return () => URL.revokeObjectURL(objectUrl);
-        } else if (!editingId) {
-            setImagePreview(null);
         }
     }, [formImage]);
 
@@ -57,6 +55,53 @@ const ServicesManager = () => {
         return data.publicUrl;
     };
 
+    const ICON_MAP: any = {
+        Briefcase, 
+        Scale, 
+        Gavel, 
+        FileText, 
+        Shield, 
+        Users, 
+        Landmark, 
+        DollarSign
+    };
+
+    const [selectedIcon, setSelectedIcon] = useState('Briefcase');
+    const [aiLoading, setAiLoading] = useState<string | null>(null);
+
+    const generateWithAI = async (mode: string, context: string, currentContent?: string) => {
+        setAiLoading(mode);
+        try {
+            const { data, error } = await supabase.functions.invoke('ai-assistant', {
+                body: { mode, context, currentContent }
+            });
+
+            if (error) throw error;
+            return data.result;
+        } catch (err: unknown) {
+            const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+            alert('Error IA: ' + errorMessage);
+            return null;
+        } finally {
+            setAiLoading(null);
+        }
+    };
+
+    const handleAIIcon = async () => {
+        if (!name) return alert('Escribe el nombre del servicio primero.');
+        const iconName = await generateWithAI('pick-icon', name);
+        if (iconName && ICON_MAP[iconName]) {
+            setSelectedIcon(iconName);
+        }
+    };
+
+    const handleAIText = async () => {
+        if (!name) return alert('Escribe el nombre del servicio primero.'); // Changed to check name for better context
+        // Use new mode for detailed description
+        const improved = await generateWithAI('generate-service-description', name);
+        if (improved) setContent(improved); // Set to content (long info), not description (short)
+    };
+
     const handleSave = async () => {
         setUploading(true);
         let imageUrl = '';
@@ -68,6 +113,9 @@ const ServicesManager = () => {
                 setUploading(false);
                 return;
             }
+        } else if (imagePreview && imagePreview.startsWith('http')) {
+            // AI Generated or existing URL
+             imageUrl = imagePreview;
         } else if (editingId) {
             const existingService = services.find(s => s.id === editingId);
             if (existingService) imageUrl = existingService.image_url;
@@ -83,7 +131,8 @@ const ServicesManager = () => {
             category,
             price_dop: parseFloat(priceDop) || 0,
             price_usd: parseFloat(priceUsd) || 0,
-            is_active: true
+            is_active: true,
+            icon_name: selectedIcon // Ensure using icon_name to match DB
         };
 
         if (imageUrl) serviceData.image_url = imageUrl;
@@ -121,6 +170,16 @@ const ServicesManager = () => {
         setPriceDop(service.price_dop?.toString() || '');
         setPriceUsd(service.price_usd?.toString() || '');
         setCategory(service.category || 'Legal');
+        // If the service has an icon field, we would use it here. 
+        // For now, we'll try to guess or default if not present, assuming 'icon' might exist in future or using default.
+        // If we strictly follow current schema, we might not have it, but I will add it to the state.
+        if (service.icon_name && ICON_MAP[service.icon_name]) {
+            setSelectedIcon(service.icon_name);
+        } else if (service.icon && ICON_MAP[service.icon]) { // Fallback for old data
+             setSelectedIcon(service.icon);
+        } else {
+            setSelectedIcon('Briefcase');
+        }
 
         if (service.image_url) {
             setImagePreview(service.image_url);
@@ -142,6 +201,7 @@ const ServicesManager = () => {
         setCategory('Legal');
         setFormImage(null);
         setImagePreview(null);
+        setSelectedIcon('Briefcase');
         setUploading(false);
     };
 
@@ -189,7 +249,10 @@ const ServicesManager = () => {
 
                             <div className="flex justify-between items-start relative z-10 mb-4">
                                 <div className="p-3 bg-navy-50 dark:bg-navy-900 rounded-xl text-navy-900 dark:text-gold-500 shadow-sm border border-gray-100 dark:border-navy-700">
-                                    <Briefcase size={28} />
+                                    {(() => {
+                                        const IconComp = ICON_MAP[service.icon_name] || ICON_MAP[service.icon] || Briefcase;
+                                        return <IconComp size={28} />;
+                                    })()}
                                 </div>
                                 <div className="flex gap-1">
                                     <button onClick={() => startEdit(service)} className="p-2 text-gray-400 hover:text-gold-500 hover:bg-gold-50 dark:hover:bg-navy-700 rounded-lg transition-colors">
@@ -244,13 +307,47 @@ const ServicesManager = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {/* Left Column: Basic Info & Image */}
                                 <div className="space-y-6">
+                                    {/* Icon Selection with AI */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <ImageIcon size={16} /> Icono
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleAIIcon}
+                                                disabled={!!aiLoading}
+                                                className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                            >
+                                                {aiLoading === 'pick-icon' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                                Sugerir Icono
+                                            </button>
+                                        </label>
+
+                                        <div className="grid grid-cols-4 gap-2 mb-4">
+                                            {Object.keys(ICON_MAP).map((iconKey) => {
+                                                const IconComponent = ICON_MAP[iconKey];
+                                                return (
+                                                    <button
+                                                        key={iconKey}
+                                                        type="button"
+                                                        onClick={() => setSelectedIcon(iconKey)}
+                                                        className={`p-3 rounded-xl flex items-center justify-center transition-all ${selectedIcon === iconKey ? 'bg-gold-500 text-navy-900 shadow-lg scale-105' : 'bg-gray-100 dark:bg-navy-800 text-gray-400 hover:bg-gray-200 dark:hover:bg-navy-700'}`}
+                                                    >
+                                                        <IconComponent size={24} />
+                                                    </button>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+
                                     {/* Image Upload Area */}
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center gap-2">
-                                            <ImageIcon size={16} /> Icono / Imagen
+                                            <ImageIcon size={16} /> Imagen de Fondo (Opcional)
                                         </label>
 
-                                        <div className="border-2 border-dashed border-gray-200 dark:border-navy-700 rounded-2xl h-48 flex flex-col items-center justify-center text-gray-400 dark:text-navy-600 bg-gray-50 dark:bg-navy-800 hover:border-gold-500 dark:hover:border-gold-500 transition-colors cursor-pointer relative group overflow-hidden">
+                                        <div className="border-2 border-dashed border-gray-200 dark:border-navy-700 rounded-2xl h-32 flex flex-col items-center justify-center text-gray-400 dark:text-navy-600 bg-gray-50 dark:bg-navy-800 hover:border-gold-500 dark:hover:border-gold-500 transition-colors cursor-pointer relative group overflow-hidden">
                                             {imagePreview ? (
                                                 <div className="w-full h-full relative">
                                                     <img src={imagePreview} className="w-full h-full object-cover" />
@@ -260,14 +357,15 @@ const ServicesManager = () => {
                                                 </div>
                                             ) : (
                                                 <>
-                                                    <ImageIcon size={32} className="mb-2 group-hover:text-gold-500 transition-colors" />
+                                                    <ImageIcon size={24} className="mb-2 group-hover:text-gold-500 transition-colors" />
                                                     <span className="text-xs font-semibold">Click para subir</span>
                                                 </>
                                             )}
                                             <input type="file" onChange={(e) => setFormImage(e.target.files?.[0] || null)} className="absolute inset-0 opacity-0 cursor-pointer z-10" accept="image/*" />
                                         </div>
                                     </div>
-
+                                    
+                                    {/* Name Input */}
                                     <div className="space-y-2">
                                         <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center gap-2">
                                             <Type size={16} /> Nombre del Servicio
@@ -312,19 +410,42 @@ const ServicesManager = () => {
                                 {/* Right Column: Description & Content */}
                                 <div className="space-y-6">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-bold text-navy-900 dark:text-gold-500">Resumen Corto (Description)</label>
+                                        <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center justify-between">
+                                            <span>Resumen Corto (Description)</span>
+                                            <button
+                                                type="button"
+                                                onClick={handleAIText}
+                                                disabled={!!aiLoading}
+                                                className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                            >
+                                                {aiLoading === 'correct-text' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                                Mejorar Texto
+                                            </button>
+                                        </label>
+                                        {/* Short description input - keeping it separate */}
                                         <textarea
                                             value={description}
                                             onChange={(e) => setDescription(e.target.value)}
-                                            placeholder="Breve descripción para la tarjeta del servicio..."
-                                            rows={3}
+                                            placeholder="Breve resumen (1-2 frases)..."
+                                            rows={2}
                                             className="w-full bg-gray-50 dark:bg-navy-800 border-none text-navy-900 dark:text-white placeholder-gray-400 dark:placeholder-navy-500 rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold-500 outline-none transition-all font-medium resize-none"
                                         />
                                     </div>
 
                                     <div className="space-y-2 h-full flex flex-col">
-                                        <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center gap-2">
-                                            <FileText size={16} /> Contenido Completo (Detalle)
+                                        <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <FileText size={16} /> Contenido Completo (Detalle)
+                                            </div>
+                                            <button
+                                                type="button"
+                                                onClick={handleAIText}
+                                                disabled={!!aiLoading}
+                                                className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                            >
+                                                {aiLoading === 'generate-service-description' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                                Generar Detalle
+                                            </button>
                                         </label>
                                         <textarea
                                             value={content}

@@ -4,26 +4,36 @@ import { Search, ChevronRight, Calendar, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BlogSubscribe from '../components/blog/BlogSubscribe';
 
+interface BlogPost {
+    id: string;
+    title: string;
+    content: string;
+    category: string;
+    image_url?: string;
+    created_at: string;
+    slug?: string;
+}
+
 const Blog = () => {
-    const [posts, setPosts] = useState<any[]>([]);
+    const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
 
     useEffect(() => {
+        const fetchPosts = async () => {
+            const { data } = await supabase
+                .from('blog_posts')
+                .select('*')
+                .eq('published', true)
+                .order('created_at', { ascending: false });
+
+            if (data) setPosts(data);
+            setLoading(false);
+        };
+
         fetchPosts();
     }, []);
-
-    const fetchPosts = async () => {
-        const { data } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('published', true)
-            .order('created_at', { ascending: false });
-
-        if (data) setPosts(data);
-        setLoading(false);
-    };
 
     // Calculate Dynamic Counts
     const categories = [
@@ -31,7 +41,7 @@ const Blog = () => {
         { name: 'Noticias', count: posts.filter(p => p.category === 'Noticias').length },
         { name: 'Consejos', count: posts.filter(p => p.category === 'Consejos').length },
         { name: 'Corporativo', count: posts.filter(p => p.category === 'Corporativo').length }
-    ].filter(c => c.count > 0); // Optional: Hide empty categories if desired, or keep them showing 0
+    ].filter(c => c.count > 0);
 
     const filteredPosts = posts.filter(post => {
         const matchesCategory = selectedCategory === 'Todos' || post.category === selectedCategory;
@@ -48,8 +58,6 @@ const Blog = () => {
 
     return (
         <div className="bg-slate-50 dark:bg-navy-900 min-h-screen font-sans transition-colors duration-300">
-            {/* Header / Navbar Placeholder (Assuming Layout handles it, but verify alignment) */}
-
             {/* Hero Section */}
             <div className="bg-navy-900 text-white pt-24 pb-16 px-4 text-center">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Blog Jurídico</h1>
@@ -88,37 +96,45 @@ const Blog = () => {
                         </div>
                     ) : (
                         <div className="space-y-8">
-                            {/* Feature First Post if needed, or simple list */}
                             {filteredPosts.map((post) => (
-                                <article key={post.id} className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row group">
-                                    <div className="md:w-2/5 h-64 md:h-auto overflow-hidden relative">
-                                        <img
-                                            src={post.image_url || 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80'}
-                                            alt={post.title}
-                                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                                        />
-                                        <div className="absolute top-4 left-4">
-                                            <span className="px-3 py-1 bg-gold-500 text-navy-900 text-xs font-bold rounded uppercase tracking-wider shadow-sm">
-                                                {post.category}
+                                /* 1. Envolvemos todo el artículo en el Link principal */
+                                <Link 
+                                    to={`/blog/${post.slug || post.id}`} 
+                                    key={post.id} 
+                                    className="block group" // 'block' para estructura y 'group' para efectos hover
+                                >
+                                    <article className="bg-white dark:bg-navy-800 cursor-pointer rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row h-full">
+                                        <div className="md:w-2/5 h-64 md:h-auto overflow-hidden relative">
+                                            <img
+                                                src={post.image_url || 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80'}
+                                                alt={post.title}
+                                                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                            <div className="absolute top-4 left-4">
+                                                <span className="px-3 py-1 bg-gold-500 text-navy-900 text-xs font-bold rounded uppercase tracking-wider shadow-sm">
+                                                    {post.category}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <div className="p-8 md:w-3/5 flex flex-col justify-center">
+                                            <div className="flex items-center gap-2 text-gold-600 text-sm font-medium mb-3">
+                                                <Calendar size={14} />
+                                                <span>{new Date(post.created_at).toLocaleDateString()}</span>
+                                            </div>
+                                            <h3 className="text-2xl font-serif font-bold text-navy-900 dark:text-white mb-3 leading-tight group-hover:text-gold-500 transition-colors">
+                                                {post.title}
+                                            </h3>
+                                            <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-3 leading-relaxed">
+                                                {post.content}
+                                            </p>
+                                            
+                                            {/* 2. Cambiamos el Link interno por un span para evitar <a> dentro de <a> */}
+                                            <span className="text-gold-600 font-bold text-sm tracking-wide uppercase flex items-center gap-2 group-hover:gap-3 transition-all self-start">
+                                                Leer más <ArrowRight size={16} />
                                             </span>
                                         </div>
-                                    </div>
-                                    <div className="p-8 md:w-3/5 flex flex-col justify-center">
-                                        <div className="flex items-center gap-2 text-gold-600 text-sm font-medium mb-3">
-                                            <Calendar size={14} />
-                                            <span>{new Date(post.created_at).toLocaleDateString()}</span>
-                                        </div>
-                                        <h3 className="text-2xl font-serif font-bold text-navy-900 dark:text-white mb-3 leading-tight group-hover:text-gold-500 transition-colors">
-                                            {post.title}
-                                        </h3>
-                                        <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-3 leading-relaxed">
-                                            {post.content}
-                                        </p>
-                                        <Link to={`/blog/${post.slug || post.id}`} className="text-gold-600 font-bold text-sm tracking-wide uppercase flex items-center gap-2 hover:gap-3 transition-all self-start">
-                                            Leer más <ArrowRight size={16} />
-                                        </Link>
-                                    </div>
-                                </article>
+                                    </article>
+                                </Link>
                             ))}
                         </div>
                     )}

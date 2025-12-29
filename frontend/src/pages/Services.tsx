@@ -40,9 +40,9 @@ const Services = () => {
                 {loading ? (
                     <div className="flex justify-center"><div className="animate-spin w-8 h-8 rounded-full border-4 border-gold-500 border-t-transparent"></div></div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 cursor-pointer">
                         {services.map((service, index) => {
-                            const IconComponent = iconMap[service.icon] || Scale;
+                            const IconComponent = iconMap[service.icon_name] || Scale;
                             return (
                                 <div key={index} className="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 border-t-4 border-gold-500">
                                     <IconComponent className="w-12 h-12 text-navy-900 mb-6" />

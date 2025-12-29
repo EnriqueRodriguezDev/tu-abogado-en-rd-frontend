@@ -1,29 +1,46 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import { ArrowLeft, Loader2 } from 'lucide-react';
+import { ArrowLeft, Loader2, Briefcase, Scale, Gavel, FileText, Shield, Users, Landmark, DollarSign } from 'lucide-react';
+
+const ICON_MAP: any = {
+    Briefcase, Scale, Gavel, FileText, Shield, Users, Landmark, DollarSign
+};
 
 const ServiceDetail = () => {
+    interface Service {
+        id: string;
+        name: string;
+        description: string;
+        content: string;
+        image_url: string;
+        category: string;
+        price_dop: number;
+        price_usd: number;
+        icon_name?: string;
+        icon?: string;
+    }
+
     const { slug } = useParams();
-    const [service, setService] = useState<any>(null);
+    const [service, setService] = useState<Service | null>(null);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        const fetchService = async () => {
+            setLoading(true);
+            // By slug
+            const { data } = await supabase
+                .from('services')
+                .select('*')
+                .eq('slug', slug)
+                .single();
+
+            if (data) setService(data);
+            setLoading(false);
+        };
+
         if (slug) fetchService();
     }, [slug]);
-
-    const fetchService = async () => {
-        setLoading(true);
-        // By slug
-        let { data } = await supabase
-            .from('services')
-            .select('*')
-            .eq('slug', slug)
-            .single();
-
-        if (data) setService(data);
-        setLoading(false);
-    };
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-navy-900">
@@ -60,7 +77,11 @@ const ServiceDetail = () => {
 
                 <div className="absolute bottom-0 left-0 w-full p-8 md:p-12">
                     <div className="max-w-4xl mx-auto">
-                        <span className="inline-block px-4 py-1.5 bg-blue-600/20 text-blue-200 border border-blue-500/30 backdrop-blur-md font-bold rounded-full text-sm mb-4 uppercase tracking-wider">
+                        <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-600/20 text-blue-200 border border-blue-500/30 backdrop-blur-md font-bold rounded-full text-sm mb-4 uppercase tracking-wider">
+                            {(() => {
+                                const IconComp = (service.icon_name && ICON_MAP[service.icon_name]) || (service.icon && ICON_MAP[service.icon]) || Briefcase;
+                                return <IconComp size={16} />;
+                            })()}
                             {service.category || 'Servicio Legal'}
                         </span>
                         <h1 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight">

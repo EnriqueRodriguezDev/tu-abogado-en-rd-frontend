@@ -1,9 +1,20 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../supabaseClient';
-import { Plus, Trash2, Image as ImageIcon, Loader2, Edit, X, Calendar, Type, FileText, ChevronDown } from 'lucide-react';
+import { Plus, Trash2, Image as ImageIcon, Loader2, Edit, X, Calendar, Type, FileText, ChevronDown, Sparkles } from 'lucide-react';
 
 const BlogManager = () => {
-    const [posts, setPosts] = useState<any[]>([]);
+    interface BlogPost {
+        id: string;
+        created_at: string;
+        title: string;
+        content: string;
+        category: string;
+        image_url: string;
+        slug: string;
+        published: boolean;
+    }
+
+    const [posts, setPosts] = useState<BlogPost[]>([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
 
@@ -16,22 +27,7 @@ const BlogManager = () => {
     const [uploading, setUploading] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
 
-    useEffect(() => {
-        fetchPosts();
-    }, []);
-
-    // Effect to generate preview URL when file changes
-    useEffect(() => {
-        if (imageFile) {
-            const objectUrl = URL.createObjectURL(imageFile);
-            setImagePreview(objectUrl);
-            return () => URL.revokeObjectURL(objectUrl);
-        } else if (!editingId) {
-            setImagePreview(null);
-        }
-    }, [imageFile]);
-
-    const fetchPosts = async () => {
+    const fetchPosts = useCallback(async () => {
         const { data } = await supabase
             .from('blog_posts')
             .select('*')
@@ -39,7 +35,33 @@ const BlogManager = () => {
 
         if (data) setPosts(data);
         setLoading(false);
-    };
+    }, []); // Removed empty dependencies to match useCallback usage
+
+    useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            const { data } = await supabase
+                .from('blog_posts')
+                .select('*')
+                .order('created_at', { ascending: false });
+
+            if (mounted) {
+                if (data) setPosts(data);
+                setLoading(false);
+            }
+        };
+        load();
+        return () => { mounted = false; };
+    }, []);
+
+    // Clean up object URLs to avoid memory leaks
+    useEffect(() => {
+        return () => {
+            if (imagePreview && imagePreview.startsWith('blob:')) {
+                URL.revokeObjectURL(imagePreview);
+            }
+        };
+    }, [imagePreview]);
 
     const handleImageUpload = async (file: File) => {
         const fileExt = file.name.split('.').pop();
@@ -55,6 +77,61 @@ const BlogManager = () => {
         return data.publicUrl;
     };
 
+    const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0] || null;
+        setImageFile(file);
+
+        if (file) {
+            const objectUrl = URL.createObjectURL(file);
+            setImagePreview(objectUrl);
+        } else {
+            if (editingId) {
+                // Determine what the original image was
+                const currentPost = posts.find(p => p.id === editingId);
+                setImagePreview(currentPost?.image_url || null);
+            } else {
+                setImagePreview(null);
+            }
+        }
+    };
+
+    const [aiLoading, setAiLoading] = useState<string | null>(null);
+
+    const generateWithAI = async (mode: string, context: string, currentContent?: string) => {
+        setAiLoading(mode);
+        try {
+            const { data, error } = await supabase.functions.invoke('ai-assistant', {
+                body: { mode, context, currentContent }
+            });
+
+            if (error) throw error;
+            return data.result;
+        } catch (err: unknown) {
+            alert('Error IA: ' + (err as Error).message);
+            return null;
+        } finally {
+            setAiLoading(null);
+        }
+    };
+
+    const handleAIContent = async () => {
+        if (!title) return alert('Por favor escribe un título primero.');
+        const generated = await generateWithAI('generate-blog-content', title);
+        if (generated) setContent(generated);
+    };
+
+    const handleAIImage = async () => {
+        if (!title) return alert('Por favor escribe un título primero.');
+        const prompt = await generateWithAI('generate-image-prompt', title);
+        
+        if (prompt) {
+            const encodedPrompt = encodeURIComponent(prompt);
+            const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=800&height=600&seed=${Math.random()}&model=flux`;
+            setImagePreview(imageUrl);
+            setImageFile(null);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setUploading(true);
@@ -67,15 +144,18 @@ const BlogManager = () => {
                 setUploading(false); // Stop if upload failed
                 return;
             }
+        } else if (imagePreview && imagePreview.startsWith('http')) {
+            // AI generated URL or existing URL - prioritizing AI which sets preview
+             imageUrl = imagePreview;
         } else if (editingId) {
-            // Keep existing image if no new file is selected
-            const existingPost = posts.find(p => p.id === editingId);
+            // Keep existing image if no new file is selected and no AI url
+            const existingPost = posts.find((p) => p.id === editingId);
             if (existingPost) imageUrl = existingPost.image_url;
         }
 
         const slug = title.toLowerCase().replace(/ /g, '-').replace(/[^\w-]+/g, '');
 
-        const postData: any = {
+        const postData: Partial<BlogPost> = {
             title,
             slug,
             content,
@@ -86,25 +166,24 @@ const BlogManager = () => {
         if (imageUrl) postData.image_url = imageUrl;
 
         let error;
+        let res;
         if (editingId) {
-            const res = await supabase.from('blog_posts').update(postData).eq('id', editingId);
+            res = await supabase.from('blog_posts').update(postData).eq('id', editingId);
             error = res.error;
         } else {
-            const res = await supabase.from('blog_posts').insert([postData]).select();
+            res = await supabase.from('blog_posts').insert([postData]).select();
             error = res.error;
+        }
 
-            // Trigger Newsletter AND Notification only on NEW posts
-            if (!error && res.data) {
-                // Trigger Newsletter
-                supabase.functions.invoke('send-newsletter', {
-                    body: {
-                        title: postData.title,
-                        content: postData.content, // Summary or excerpt would be better ideally
-                        imageUrl: imageUrl,
-                        slug: postData.slug
-                    }
-                });
-            }
+        // Trigger Newsletter for both create and update
+        const targetId = editingId || (res.data && res.data[0]?.id);
+
+        if (!error && targetId) {
+            supabase.functions.invoke('send-newsletter', {
+                body: {
+                    postId: targetId
+                }
+            });
         }
 
         if (error) {
@@ -115,9 +194,6 @@ const BlogManager = () => {
         }
         setUploading(false);
     };
-
-
-
 
     const resetForm = () => {
         setTitle('');
@@ -139,7 +215,7 @@ const BlogManager = () => {
         }
     };
 
-    const startEdit = (post: any) => {
+    const startEdit = (post: BlogPost) => {
         setEditingId(post.id);
         setTitle(post.title);
         setContent(post.content || '');
@@ -257,8 +333,19 @@ const BlogManager = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-sm font-bold text-navy-900 dark:text-gold-500 mb-2 flex items-center gap-2">
-                                        <ImageIcon size={16} /> Imagen Destacada
+                                    <label className="text-sm font-bold text-navy-900 dark:text-gold-500 mb-2 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <ImageIcon size={16} /> Imagen Destacada
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleAIImage}
+                                            disabled={!!aiLoading}
+                                            className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                        >
+                                            {aiLoading === 'generate-image-prompt' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                            Generar con IA
+                                        </button>
                                     </label>
 
                                     {/* Updated Image Upload with Preview */}
@@ -281,7 +368,7 @@ const BlogManager = () => {
                                         )}
                                         <input
                                             type="file"
-                                            onChange={(e) => setImageFile(e.target.files?.[0] || null)}
+                                            onChange={handleImageSelect}
                                             className="absolute inset-0 opacity-0 cursor-pointer z-10"
                                             accept="image/*"
                                         />
@@ -310,8 +397,19 @@ const BlogManager = () => {
                                 </div>
 
                                 <div>
-                                    <label className="text-sm font-bold text-navy-900 dark:text-gold-500 mb-2 flex items-center gap-2">
-                                        <FileText size={16} /> Contenido
+                                    <label className="text-sm font-bold text-navy-900 dark:text-gold-500 mb-2 flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <FileText size={16} /> Contenido
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={handleAIContent}
+                                            disabled={!!aiLoading}
+                                            className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                        >
+                                            {aiLoading === 'generate-blog-content' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
+                                            Redactar con IA
+                                        </button>
                                     </label>
                                     <textarea
                                         placeholder="Escribe el contenido de tu artículo aquí..."

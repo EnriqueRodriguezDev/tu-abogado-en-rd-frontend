@@ -1,7 +1,18 @@
+version: '3.8'
+
 services:
   frontend:
-    build: ./frontend
+    container_name: tu-abogado-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
+        VITE_SUPABASE_ANON_KEY: ${VITE_SUPABASE_ANON_KEY}
+        VITE_RESEND_LINK: ${VITE_RESEND_LINK}
+        VITE_RESEND_API_KEY: ${VITE_RESEND_API_KEY}
     ports:
       - "80:80"
     restart: always
-    container_name: tu-abogado-frontend
+    env_file:
+      - .env

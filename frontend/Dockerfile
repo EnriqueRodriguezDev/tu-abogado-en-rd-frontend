@@ -1,5 +1,5 @@
 # Stage 1: Build the application
-FROM node:20-alpine as build
+FROM node:25-alpine as build
 
 WORKDIR /app
 
@@ -7,11 +7,20 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 
 # Install dependencies
-# Using ci for cleaner, deterministic installs
 RUN npm ci
 
 # Copy source code
 COPY . .
+
+ARG VITE_SUPABASE_URL
+ARG VITE_SUPABASE_ANON_KEY
+ARG VITE_RESEND_LINK
+ARG VITE_RESEND_API_KEY
+
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_ANON_KEY=$VITE_SUPABASE_ANON_KEY
+ENV VITE_RESEND_LINK=$VITE_RESEND_LINK
+ENV VITE_RESEND_API_KEY=$VITE_RESEND_API_KEY
 
 # Build the app
 RUN npm run build

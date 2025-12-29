@@ -13,7 +13,7 @@ const BlogSubscribe = () => {
         setStatus('loading');
 
         try {
-            const { data, error } = await supabase.functions.invoke('subscriptions', {
+            const { data, error } = await supabase.functions.invoke('subscribe', {
                 body: { email }
             });
 
