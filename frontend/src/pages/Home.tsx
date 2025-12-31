@@ -2,6 +2,7 @@
 import { motion } from 'framer-motion';
 import { ArrowRight, Video, Scale, Home as HomeIcon, Plane, Users, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useLocalizedContent } from '../hooks/useLocalizedContent';
 
 const Home = () => {
     const fadeInUp = {
@@ -10,38 +11,50 @@ const Home = () => {
         transition: { duration: 0.6 }
     };
 
+    const { getLocalizedField } = useLocalizedContent<any>();
+
     const services = [
         {
             icon: Scale,
             title: 'Derecho Civil',
+            title_en: 'Civil Law',
             description: 'Litigios y Resolución de Conflictos',
+            description_en: 'Litigation and Dispute Resolution',
         },
         {
             icon: HomeIcon,
             title: 'Inmobiliario',
+            title_en: 'Real Estate',
             description: 'Compra, Venta y Bienes Raíces',
+            description_en: 'Buying, Selling and Real Estate',
         },
         {
             icon: Plane,
             title: 'Migratorio',
+            title_en: 'Immigration',
             description: 'Residencia, Visados y Ciudadanía',
+            description_en: 'Residency, Visas and Citizenship',
         },
         {
             icon: Users,
             title: 'Familia',
+            title_en: 'Family Law',
             description: 'Divorcios, Herencias y Sucesiones',
+            description_en: 'Divorces, Inheritances and Successions',
         },
     ];
 
     const articles = [
         {
             title: '¿Cómo hacer una declaración de herederos en RD?',
+            title_en: 'How to make a declaration of heirs in DR?',
             date: '20 Oct, 2024',
             category: 'Derecho Civil',
             image: 'bg-green-900', // Placeholder
         },
         {
             title: 'Guía para obtener la residencia dominicana',
+            title_en: 'Guide to obtaining Dominican residency',
             date: '15 Oct, 2024',
             category: 'Migración',
             image: 'bg-slate-200',
@@ -155,8 +168,8 @@ const Home = () => {
                         {services.map((service, index) => (
                             <div key={index} className="bg-white p-8 rounded-xl shadow-sm hover:shadow-xl transition-shadow duration-300 border border-transparent hover:border-gold-200 group">
                                 <service.icon className="w-10 h-10 text-gold-500 mb-6 group-hover:scale-110 transition-transform duration-300" />
-                                <h3 className="text-xl font-serif font-bold text-navy-900 mb-2">{service.title}</h3>
-                                <p className="text-gray-500 text-sm mb-4">{service.description}</p>
+                                <h3 className="text-xl font-serif font-bold text-navy-900 mb-2">{getLocalizedField(service, 'title')}</h3>
+                                <p className="text-gray-500 text-sm mb-4">{getLocalizedField(service, 'description')}</p>
                                 <Link to="/servicios" className="inline-flex items-center text-gold-600 font-medium text-sm hover:text-gold-700">
                                     Ver detalles <ChevronRight className="w-4 h-4 ml-1" />
                                 </Link>
@@ -224,7 +237,7 @@ const Home = () => {
                                     {article.category}
                                 </div>
                                 <h3 className="text-2xl font-serif font-bold text-navy-900 mb-3 group-hover:text-gold-600 transition-colors">
-                                    {article.title}
+                                    {getLocalizedField(article, 'title')}
                                 </h3>
                                 <p className="text-gray-500 text-sm flex items-center gap-2">
                                     {article.date}

@@ -5,25 +5,74 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    /* Mobile viewport fix - dynamic viewport height */
+    min-height: 100dvh;
+  }
+
+  html {
+    /* Disable tap highlight on mobile for native feel */
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply font-sans antialiased text-slate-800 bg-slate-50 transition-colors duration-300;
+    /* 
+       Typography: Inter for body
+       Colors: Slate-700 (Legible Dark Gray) instead of light grays
+    */
+    @apply font-sans antialiased text-slate-700 bg-slate-50 transition-colors duration-300;
+    min-height: 100dvh;
   }
+
   .dark body {
-    @apply bg-navy-900 text-slate-100;
+    @apply bg-navy-900 text-slate-300;
   }
+
+  /* 
+     Typography: Playfair Display for all headings
+     Colors: Slate-900 (Almost Black) for authority and contrast
+  */
   h1, h2, h3, h4, h5, h6 {
-    @apply font-serif;
+    @apply font-serif text-slate-900 font-bold;
+  }
+
+  .dark h1, .dark h2, .dark h3, .dark h4, .dark h5, .dark h6 {
+    @apply text-slate-50;
+  }
+
+  /* 
+     Mobile Input Optimization 
+     Prevents iOS zoom on focus by enforcing 16px size 
+  */
+  input, textarea, select {
+    font-size: 16px !important;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gold-500 hover:bg-gold-600 transition-colors duration-200 shadow-md;
+    /* Added min-h-[44px] for touch targets */
+    @apply inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-gold-500 hover:bg-gold-600 transition-colors duration-200 shadow-md min-h-[44px];
   }
   .btn-outline {
-    @apply inline-flex items-center justify-center px-6 py-3 border border-white/30 text-base font-medium rounded-md text-white hover:bg-white/10 transition-colors duration-200;
+    @apply inline-flex items-center justify-center px-6 py-3 border border-white/30 text-base font-medium rounded-md text-white hover:bg-white/10 transition-colors duration-200 min-h-[44px];
   }
   .section-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  /* Safe Area Utilities for Notch support */
+  .pt-safe {
+    padding-top: env(safe-area-inset-top);
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  
+  /* Responsive Table Container */
+  .table-responsive {
+    @apply w-full overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
   }
 }

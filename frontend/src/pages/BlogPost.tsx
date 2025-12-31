@@ -3,38 +3,44 @@ import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { Calendar, ArrowLeft, Clock, Share2, Tag, Loader2 } from 'lucide-react';
 import BlogSubscribe from '../components/blog/BlogSubscribe';
+import { useLocalizedContent } from '../hooks/useLocalizedContent';
+import { type BlogPost as BlogPostType } from '../types';
 
 const BlogPost = () => {
     const { slug } = useParams();
-    const [post, setPost] = useState<any>(null);
+    const [post, setPost] = useState<BlogPostType | null>(null);
     const [loading, setLoading] = useState(true);
+    const { getLocalizedField } = useLocalizedContent<BlogPostType>();
 
     useEffect(() => {
-        if (slug) fetchPost();
-    }, [slug]);
-
-    const fetchPost = async () => {
-        setLoading(true);
-        // Try fetching by slug first
-        let { data, error } = await supabase
-            .from('blog_posts')
-            .select('*')
-            .eq('slug', slug)
-            .single();
-
-        // Fallback: try by ID if slug fails (in case we used ID in URL temporarily)
-        if (!data) {
-            const { data: byId } = await supabase
+        // Definir la función DENTRO del efecto para evitar problemas de dependencias y estado
+        const fetchPost = async () => {
+            if (!slug) return;
+            setLoading(true);
+            
+            // Try fetching by slug first
+            let { data } = await supabase
                 .from('blog_posts')
                 .select('*')
-                .eq('id', slug)
+                .eq('slug', slug)
                 .single();
-            data = byId;
-        }
 
-        if (data) setPost(data);
-        setLoading(false);
-    };
+            // Fallback: try by ID if slug fails
+            if (!data) {
+                const { data: byId } = await supabase
+                    .from('blog_posts')
+                    .select('*')
+                    .eq('id', slug)
+                    .single();
+                data = byId;
+            }
+
+            if (data) setPost(data);
+            setLoading(false);
+        };
+
+        fetchPost();
+    }, [slug]); // Solo depende de slug
 
     if (loading) return (
         <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-navy-900">
@@ -64,7 +70,7 @@ const BlogPost = () => {
             <div className="w-full h-[400px] relative">
                 <img
                     src={post.image_url || 'https://images.unsplash.com/photo-1589829085413-56de8ae18c73?auto=format&fit=crop&q=80'}
-                    alt={post.title}
+                    alt={getLocalizedField(post, 'title')}
                     className="w-full h-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy-900/90 via-navy-900/40 to-transparent"></div>
@@ -75,7 +81,7 @@ const BlogPost = () => {
                             {post.category}
                         </span>
                         <h1 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight">
-                            {post.title}
+                            {getLocalizedField(post, 'title')}
                         </h1>
                         <div className="flex flex-wrap gap-6 text-gray-300 text-sm md:text-base">
                             <div className="flex items-center gap-2">
@@ -96,11 +102,10 @@ const BlogPost = () => {
 
                     {/* Content */}
                     <article className="prose prose-lg dark:prose-invert max-w-none">
-                        {/* We use simple whitespace-pre-wrap for now, assuming plain text content. 
-                            If moving to rich text later, we'd use a parser here. */}
-                        <div className="whitespace-pre-wrap font-serif">
-                            {post.content}
-                        </div>
+                         <div 
+                            className="whitespace-pre-wrap font-serif [&>p]:mb-4 [&>ul]:list-disc [&>ul]:pl-5 [&>h3]:text-xl [&>h3]:font-bold [&>h3]:mt-6 [&>h3]:mb-3"
+                            dangerouslySetInnerHTML={{ __html: getLocalizedField(post, 'content') }}
+                        />
                     </article>
 
                     {/* Tags & Share */}

@@ -2,13 +2,16 @@
 import { Scale, Home as HomeIcon, Plane, Users, Briefcase, FileText } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { supabase } from '../supabaseClient';
+import { type Service } from '../types';
+import { useLocalizedContent } from '../hooks/useLocalizedContent';
 
 const Services = () => {
-    const [services, setServices] = useState<any[]>([]);
+    const [services, setServices] = useState<Service[]>([]);
+    const { getLocalizedField } = useLocalizedContent<Service>();
     const [loading, setLoading] = useState(true);
 
     // Icon Mapping
-    const iconMap: any = {
+    const iconMap: Record<string, any> = {
         Scale, Home: HomeIcon, Plane, Users, Briefcase, FileText
     };
 
@@ -42,15 +45,16 @@ const Services = () => {
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 cursor-pointer">
                         {services.map((service, index) => {
-                            const IconComponent = iconMap[service.icon_name] || Scale;
+                            const iconKey = service.icon_name || service.icon || 'Scale';
+                            const IconComponent = iconMap[iconKey] || Scale;
                             return (
                                 <div key={index} className="bg-white p-8 rounded-xl shadow-md hover:shadow-xl transition-shadow duration-300 border-t-4 border-gold-500">
                                     <IconComponent className="w-12 h-12 text-navy-900 mb-6" />
-                                    <h3 className="text-2xl font-serif font-bold text-navy-900 mb-4">{service.name}</h3>
+                                    <h3 className="text-2xl font-serif font-bold text-navy-900 mb-4">{getLocalizedField(service, 'name')}</h3>
                                     <p className="text-gray-600 leading-relaxed">
-                                        {service.description}
+                                        {getLocalizedField(service, 'description')}
                                     </p>
-                                    {(service.price_dop > 0 || service.price_usd > 0) && (
+                                    {(Number(service.price_dop) > 0 || Number(service.price_usd) > 0) && (
                                         <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between text-sm font-bold text-gold-600">
                                             <span>RD$ {service.price_dop}</span>
                                             <span>USD$ {service.price_usd}</span>

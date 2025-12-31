@@ -1,21 +1,15 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '../supabaseClient';
 import { Search, ChevronRight, Calendar, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import BlogSubscribe from '../components/blog/BlogSubscribe';
-
-interface BlogPost {
-    id: string;
-    title: string;
-    content: string;
-    category: string;
-    image_url?: string;
-    created_at: string;
-    slug?: string;
-}
+import { type BlogPost } from '../types';
+import { useLocalizedContent } from '../hooks/useLocalizedContent';
 
 const Blog = () => {
     const [posts, setPosts] = useState<BlogPost[]>([]);
+    const { getLocalizedField } = useLocalizedContent<BlogPost>();
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('Todos');
@@ -45,7 +39,8 @@ const Blog = () => {
 
     const filteredPosts = posts.filter(post => {
         const matchesCategory = selectedCategory === 'Todos' || post.category === selectedCategory;
-        const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase());
+        const displayTitle = getLocalizedField(post, 'title');
+        const matchesSearch = displayTitle.toLowerCase().includes(searchTerm.toLowerCase());
         return matchesCategory && matchesSearch;
     });
 
@@ -60,7 +55,7 @@ const Blog = () => {
         <div className="bg-slate-50 dark:bg-navy-900 min-h-screen font-sans transition-colors duration-300">
             {/* Hero Section */}
             <div className="bg-navy-900 text-white pt-24 pb-16 px-4 text-center">
-                <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4">Blog Jurídico</h1>
+                <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-white">Blog</h1>
                 <p className="text-gray-300 max-w-2xl mx-auto mb-8 font-light text-lg">
                     Información legal clara y actualizada para dominicanos, latinos y extranjeros.
                 </p>
@@ -122,10 +117,11 @@ const Blog = () => {
                                                 <span>{new Date(post.created_at).toLocaleDateString()}</span>
                                             </div>
                                             <h3 className="text-2xl font-serif font-bold text-navy-900 dark:text-white mb-3 leading-tight group-hover:text-gold-500 transition-colors">
-                                                {post.title}
+                                                {getLocalizedField(post, 'title')}
                                             </h3>
                                             <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-3 leading-relaxed">
-                                                {post.content}
+                                                {/* Use content as excerpt if description not available, but stripping HTML would be better. For now just raw content */}
+                                                {getLocalizedField(post, 'content')} 
                                             </p>
                                             
                                             {/* 2. Cambiamos el Link interno por un span para evitar <a> dentro de <a> */}

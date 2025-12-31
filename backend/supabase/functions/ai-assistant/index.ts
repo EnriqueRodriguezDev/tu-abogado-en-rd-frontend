@@ -50,6 +50,16 @@ serve(async (req) => {
          prompt = `Select an icon for a service named: "${context}".`;
          break;
 
+      case 'translate-content':
+         systemInstruction = "You are a professional legal translator. Detect the input language. If the input is in Spanish, translate it to English. If the input is in English, translate it to Spanish. Maintain the exact same HTML structure if present (preserve all tags like <p>, <strong>, <ul>, <li>, <h3>, etc.). Do not add markdown code blocks. Return ONLY the translated text. Tone: Professional and Legal.";
+         prompt = `Translate this text (detect language first):\n\n${currentContent || context}`;
+         break;
+
+      case 'generate-service-slug':
+        systemInstruction = "You are an expert SEO specialist. Generate a URL slug based on the provided text. Return ONLY the slug, lowercase, with hyphens.";
+        prompt = `Generate a SEO-friendly URL slug in English based on this title: "${context}". Lowercase, hyphens only. Return ONLY the slug.`;
+        break;
+
       default:
         throw new Error('Invalid mode');
     }
