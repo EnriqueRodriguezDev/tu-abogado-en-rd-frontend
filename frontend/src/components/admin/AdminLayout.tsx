@@ -13,7 +13,8 @@ import {
     X,
     Building2,
     Receipt,
-    Barcode
+    Barcode,
+    Users
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -41,6 +42,7 @@ const AdminLayout = () => {
         { name: 'Facturas', href: '/admin/invoices', icon: Receipt },
         { name: 'Gestión NCF', href: '/admin/ncf', icon: Barcode },
         { name: 'Empresa', href: '/admin/company-settings', icon: Building2 },
+        { name: 'Equipo Legal', href: '/admin/lawyers', icon: Users },
         { name: 'Links de Pago', href: '/admin/payment-links', icon: LinkIcon },
     ];
 

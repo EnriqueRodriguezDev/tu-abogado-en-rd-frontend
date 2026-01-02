@@ -86,6 +86,18 @@ export type PaymentMethod = 'paypal' | 'transfer' | 'azul' | 'cardnet';
 
 // --- DATABASE TYPES ---
 
+export interface Lawyer {
+    id: string;
+    created_at: string;
+    name: string;
+    email: string;
+    phone: string;
+    image_url?: string;
+    specialties?: string;
+    reminder_minutes_before: number;
+    is_active: boolean;
+}
+
 export interface Appointment {
     id: string;
     created_at: string;
@@ -100,6 +112,8 @@ export interface Appointment {
     reason: string;
     total_price: number;
     appointment_code?: string;
+    lawyer_id?: string;
+    lawyer?: Lawyer;
 }
 
 export type AppointmentInsert = Omit<Appointment, 'id' | 'created_at'>;

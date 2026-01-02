@@ -99,6 +99,21 @@ serve(async (req) => {
             if (settings) companyRncSnapshot = settings.rnc;
         }
 
+        // --- NEW: ASSIGN DEFAULT LAWYER ---
+        // Find the first active lawyer to assign
+        let assignedLawyerId = null;
+        const { data: activeLawyer } = await supabase
+            .from('lawyers')
+            .select('id')
+            .eq('is_active', true)
+            .limit(1)
+            .single();
+
+        if (activeLawyer) {
+            assignedLawyerId = activeLawyer.id;
+        }
+        // -----------------------------------
+
         // 3. Database Transaction
         // Insert Appointment
         const { data: newAppointment, error: appError } = await supabase
@@ -115,7 +130,8 @@ serve(async (req) => {
                 client_phone: appointmentData.client_phone,
                 reason: appointmentData.reason,
                 total_price: appointmentData.total_price,
-                appointment_code: appointmentCode
+                appointment_code: appointmentCode,
+                lawyer_id: assignedLawyerId
             }])
             .select()
             .single();
@@ -190,7 +206,7 @@ serve(async (req) => {
         }
 
         return new Response(
-            JSON.stringify({ success: true, appointmentId: newAppointment.id, ncf: ncfNumber }),
+            JSON.stringify({ success: true, appointmentId: newAppointment.id, ncf: ncfNumber, appointmentCode: appointmentCode }),
             { headers: { ...corsHeaders, "Content-Type": "application/json" } },
         );
 

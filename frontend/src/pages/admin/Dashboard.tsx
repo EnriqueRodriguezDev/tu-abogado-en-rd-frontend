@@ -6,8 +6,9 @@ import {
 } from 'lucide-react';
 import { formatTime, generateWhatsAppLink } from '../../utils/formatters';
 import { generateInvoicePDF } from '../../utils/invoiceGenerator';
-import { AlertModal, ConfirmDialog } from '../../components/ui/Modal';
+import { AlertModal, ConfirmDialog, BaseModal } from '../../components/ui/Modal';
 import { Tooltip } from '../../components/ui/Tooltip';
+import type { Lawyer } from '../../types';
 
 const Dashboard = () => {
     interface DashboardAppointment {
@@ -16,14 +17,15 @@ const Dashboard = () => {
         time: string;
         client_name: string;
         client_phone: string;
-        client_email: string; // Ensure this is present
+        client_email: string;
         status: string;
         total_price: number;
         duration_minutes: number;
         meeting_type: string;
         appointment_code?: string;
+        lawyer?: Lawyer;
         payments: {
-            id: string; // Ensure ID is present
+            id: string;
             method: string;
             status: string;
             proof_url?: string;
@@ -48,6 +50,7 @@ const Dashboard = () => {
         onConfirm: async () => { },
         isProcessing: false
     });
+    const [selectedLawyer, setSelectedLawyer] = useState<Lawyer | null>(null);
 
     useEffect(() => {
         fetchData();
@@ -59,6 +62,7 @@ const Dashboard = () => {
             .from('appointments')
             .select(`
                 *,
+                lawyer:lawyers(*),
                 payments(
                     id,
                     method,
@@ -183,8 +187,6 @@ const Dashboard = () => {
     };
 
     const handleConfirmPayment = async (apptId: string) => {
-        // Reusing the same name for "confirmTransfer" logic but renamed for generic use if needed
-        // Assuming this was confirmTransfer before.
         const apt = appointments.find(a => a.id === apptId);
         if (!apt) return;
 
@@ -250,7 +252,6 @@ const Dashboard = () => {
 
     const filteredAppointments = appointments.filter(app => {
         if (filterStatus === 'all') return true;
-        // Handle 'pending' filter to include both 'pending' and 'pending_payment'
         if (filterStatus === 'pending') {
             return app.status === 'pending' || app.status === 'pending_payment';
         }
@@ -339,6 +340,7 @@ const Dashboard = () => {
                             <tr>
                                 <th className="p-6">Fecha/Hora</th>
                                 <th className="p-6">Cliente</th>
+                                <th className="p-6">Abogado</th>
                                 <th className="p-6">Servicio</th>
                                 <th className="p-6">Pago / NCF</th>
                                 <th className="p-6">Estado</th>
@@ -347,7 +349,7 @@ const Dashboard = () => {
                         </thead>
                         <tbody className="divide-y divide-gray-100 dark:divide-navy-700">
                             {loading ? (
-                                <tr><td colSpan={6} className="p-12 text-center"><Loader2 className="animate-spin mx-auto text-gold-500" /></td></tr>
+                                <tr><td colSpan={7} className="p-12 text-center"><Loader2 className="animate-spin mx-auto text-gold-500" /></td></tr>
                             ) : filteredAppointments.map((apt) => (
                                 <tr key={apt.id} className="hover:bg-gray-50 dark:hover:bg-navy-700/50 transition-colors group">
                                     <td className="p-6">
@@ -356,7 +358,6 @@ const Dashboard = () => {
                                     </td>
                                     <td className="p-6">
                                         <div className="flex items-center gap-3">
-
                                             <div>
                                                 <div className="font-bold text-navy-900 dark:text-white">{apt.client_name}</div>
                                                 {apt.appointment_code && (
@@ -375,6 +376,25 @@ const Dashboard = () => {
                                                 </div>
                                             </div>
                                         </div>
+                                    </td>
+                                    <td className="p-6">
+                                        {apt.lawyer ? (
+                                            <div onClick={() => setSelectedLawyer(apt.lawyer!)} className="flex items-center gap-3 cursor-pointer group/lawyer hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                                                <div className="w-10 h-10 rounded-full bg-navy-900 text-white flex items-center justify-center font-bold text-xs overflow-hidden border-2 border-transparent group-hover/lawyer:border-gold-500">
+                                                    {apt.lawyer.image_url ? (
+                                                        <img src={apt.lawyer.image_url} alt={apt.lawyer.name} className="w-full h-full object-cover" />
+                                                    ) : (
+                                                        apt.lawyer.name.substring(0, 2).toUpperCase()
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <div className="font-bold text-sm text-navy-900 dark:text-white group-hover/lawyer:text-gold-600 transition-colors">{apt.lawyer.name}</div>
+                                                    <div className="text-[10px] bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded w-fit">Ver Perfil</div>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <span className="text-gray-400 italic text-xs">Sin asignar</span>
+                                        )}
                                     </td>
                                     <td className="p-6">
                                         <div className="font-medium text-gray-600 dark:text-gray-300">Asesoría Legal</div>
@@ -511,6 +531,47 @@ const Dashboard = () => {
                 message={confirm.message}
                 isProcessing={confirm.isProcessing}
             />
+
+            {/* Lawyer Detail Modal */}
+            {selectedLawyer && (
+                <BaseModal
+                    isOpen={!!selectedLawyer}
+                    onClose={() => setSelectedLawyer(null)}
+                    title="Detalles del Abogado"
+                    maxWidth="max-w-sm"
+                >
+                    <div className="flex flex-col items-center text-center space-y-4">
+                        <div className="w-32 h-32 rounded-full bg-gray-200 overflow-hidden border-4 border-gold-500 shadow-xl">
+                            {selectedLawyer.image_url ? (
+                                <img src={selectedLawyer.image_url} alt={selectedLawyer.name} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center bg-navy-900 text-white font-bold text-3xl">
+                                    {selectedLawyer.name.charAt(0)}
+                                </div>
+                            )}
+                        </div>
+                        <div>
+                            <h3 className="text-2xl font-bold text-navy-900">{selectedLawyer.name}</h3>
+                            <p className="text-gold-600 font-bold text-sm uppercase tracking-wider">Abogado Senior</p>
+                        </div>
+
+                        <div className="w-full bg-gray-50 rounded-xl p-4 text-left space-y-2 text-sm border border-gray-100">
+                            <div className="flex justify-between border-b border-gray-200 pb-2">
+                                <span className="text-gray-500">Email:</span>
+                                <span className="font-medium text-navy-900">{selectedLawyer.email}</span>
+                            </div>
+                            <div className="flex justify-between border-b border-gray-200 pb-2">
+                                <span className="text-gray-500">Teléfono:</span>
+                                <span className="font-medium text-navy-900">{selectedLawyer.phone}</span>
+                            </div>
+                            <div className="pt-2">
+                                <span className="block text-gray-500 mb-1">Especialidades:</span>
+                                <p className="font-medium text-navy-900">{selectedLawyer.specialties || 'General'}</p>
+                            </div>
+                        </div>
+                    </div>
+                </BaseModal>
+            )}
         </div>
     );
 };

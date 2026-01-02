@@ -103,6 +103,7 @@ const Booking = () => {
     const [transferFile, setTransferFile] = useState<File | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
     const [bookingComplete, setBookingComplete] = useState(false);
+    const [confirmedCode, setConfirmedCode] = useState<string | null>(null);
     const [apiError, setApiError] = useState<string | null>(null);
 
     const totalPrice = selectedVariant ? selectedVariant.price_usd : 0;
@@ -326,6 +327,10 @@ const Booking = () => {
 
             if (error) throw new Error(error.message);
             if (data?.error) throw new Error(data.error);
+
+            if (data?.appointmentCode) {
+                setConfirmedCode(data.appointmentCode);
+            }
 
             setBookingComplete(true);
         } catch (err: unknown) {
@@ -775,6 +780,15 @@ const Booking = () => {
         <div className="text-center py-16 animate-in zoom-in duration-500">
             <div className="w-24 h-24 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl"><CheckCircle size={48} /></div>
             <h2 className="text-3xl font-serif font-bold text-navy-900 mb-4">¡Reserva Exitosa!</h2>
+
+            {confirmedCode && (
+                <div className="bg-navy-50 border border-navy-100 rounded-2xl p-6 max-w-sm mx-auto mb-8 shadow-sm">
+                    <p className="text-sm font-bold text-navy-600 uppercase tracking-wider mb-2">Tu Código de Cita</p>
+                    <div className="text-4xl font-mono font-bold text-navy-900 tracking-widest">{confirmedCode}</div>
+                    <p className="text-xs text-gray-500 mt-2">Guarda este código para consultas futuras</p>
+                </div>
+            )}
+
             <p className="text-gray-500 mb-8 max-w-md mx-auto">Hemos enviado un correo a <strong>{clientData.email}</strong> con los detalles.</p>
             <button onClick={() => window.location.reload()} className="bg-navy-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-navy-800">Nueva Cita</button>
         </div>
