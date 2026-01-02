@@ -269,29 +269,34 @@ const Booking = () => {
         const slots: TimeSlot[] = [];
         const duration = selectedVariant.duration_minutes || 30;
 
-        // Configuration for time filters
         const config = {
-            morning: { start: 9 * 60, end: 12 * 60 },     // 09:00 - 12:00
-            afternoon: { start: 13 * 60, end: 17 * 60 },  // 13:00 - 17:00
-            evening: { start: 17 * 60, end: 20 * 60 }     // 17:00 - 20:00
+            morning: { start: 9 * 60, end: 12 * 60 },
+            afternoon: { start: 13 * 60, end: 17 * 60 },
+            evening: { start: 17 * 60, end: 20 * 60 }
         };
 
         const { start, end } = config[timeFilter];
-        let current = start;
+        let current = start; 
+        
+        // Obtenemos minutos actuales para comparar
+        const now = new Date();
+        const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
         while (current + duration <= end) {
             const slotStart = current;
             const slotEnd = current + duration;
 
-            // Check collision
+            // Check collision con citas existentes
             const isBusy = busyRanges.some(range => {
-                // Overlap logic: (StartA < EndB) and (EndA > StartB)
                 return (slotStart < range.end) && (slotEnd > range.start);
             });
 
+            // Check si es hora pasada (Solo si es HOY)
+            const isPast = isToday && (slotStart <= currentMinutes);
+
             slots.push({
                 time: formatTime(slotStart),
-                available: !isBusy
+                available: !isBusy && !isPast // <--- AQUÍ LA VALIDACIÓN
             });
 
             current += duration;
@@ -299,6 +304,41 @@ const Booking = () => {
 
         return slots;
     };
+
+    const isToday = useMemo(() => {
+        if (!selectedDate) return false;
+        const today = new Date();
+        return (
+            selectedDate.getDate() === today.getDate() &&
+            selectedDate.getMonth() === today.getMonth() &&
+            selectedDate.getFullYear() === today.getFullYear()
+        );
+    }, [selectedDate]);
+
+    const isTabDisabled = (tab: 'morning' | 'afternoon' | 'evening') => {
+        if (!isToday) return false; // Si no es hoy, todo está activo
+
+        const now = new Date();
+        const currentHour = now.getHours();
+
+        // Mañana termina a las 12:00 PM
+        if (tab === 'morning' && currentHour >= 12) return true;
+        
+        // Tarde termina a las 5:00 PM (17:00)
+        if (tab === 'afternoon' && currentHour >= 17) return true;
+        
+        // Noche termina a las 9:00 PM (21:00) - Opcional, si quieres bloquear noche tarde
+        if (tab === 'evening' && currentHour >= 21) return true;
+
+        return false;
+    };
+
+    useEffect(() => {
+        if (isToday && isTabDisabled(timeFilter)) {
+            if (!isTabDisabled('afternoon')) setTimeFilter('afternoon');
+            else if (!isTabDisabled('evening')) setTimeFilter('evening');
+        }
+    }, [selectedDate, isToday]); // Ejecutar cuando cambia el día
 
     // --- SAVE LOGIC ---
     const saveBooking = async (method: string, transactionId?: string, proofUrl?: string) => {
@@ -564,14 +604,26 @@ const Booking = () => {
             <div className="bg-gray-50 rounded-3xl p-6">
                 <div className="flex items-center justify-between mb-6">
                     <span className="font-bold text-gray-500 uppercase text-sm tracking-wider">Horarios</span>
-                    <div className="flex bg-white rounded-lg p-1 text-xs font-bold shadow-sm">
-                        {(['morning', 'afternoon', 'evening'] as const).map(f => (
-                            <button key={f} onClick={() => setTimeFilter(f)} className={`px-3 py-1.5 rounded-md transition-all ${timeFilter === f ? 'bg-gray-100 text-navy-900' : 'text-gray-400'}`}>
-                                {f === 'morning' ? 'Mañana' : f === 'afternoon' ? 'Tarde' : 'Noche'}
-                            </button>
-                        ))}
+                        <div className="flex bg-white rounded-lg p-1 text-xs font-bold shadow-sm">
+                            {(['morning', 'afternoon', 'evening'] as const).map(f => {
+                                const disabled = isTabDisabled(f); // Verificar si está deshabilitado
+                                return (
+                                    <button 
+                                        key={f} 
+                                        onClick={() => !disabled && setTimeFilter(f)} 
+                                        disabled={disabled}
+                                        className={`
+                                            px-3 py-1.5 rounded-md transition-all 
+                                            ${timeFilter === f ? 'bg-gray-100 text-navy-900 shadow-sm' : 'text-gray-400'}
+                                            ${disabled ? 'opacity-30 cursor-not-allowed bg-gray-50 text-gray-300 decoration-slice' : 'hover:bg-gray-50'}
+                                        `}
+                                    >
+                                        {f === 'morning' ? 'Mañana' : f === 'afternoon' ? 'Tarde' : 'Noche'}
+                                    </button>
+                                );
+                            })}
+                        </div>
                     </div>
-                </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {generateTimeSlots().map(({ time, available }) => (
                         <button

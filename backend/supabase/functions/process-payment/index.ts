@@ -3,6 +3,8 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+// NOTA: Deno busca estas variables SIN el prefijo VITE_
 const PAYPAL_CLIENT_ID = Deno.env.get("PAYPAL_CLIENT_ID")!;
 const PAYPAL_SECRET = Deno.env.get("PAYPAL_SECRET")!;
 const PAYPAL_API_BASE = Deno.env.get("PAYPAL_ENV") === "sandbox" ? "https://api-m.sandbox.paypal.com" : "https://api-m.paypal.com";
@@ -15,9 +17,7 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-    if (req.method === "OPTIONS") {
-        return new Response("ok", { headers: corsHeaders });
-    }
+    if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
     try {
         const { orderID, paymentMethod, appointmentData, paymentData, client_rnc } = await req.json();
@@ -25,97 +25,90 @@ serve(async (req) => {
         let transactionId = orderID;
         let paymentStatus = "pending";
         let ncfNumber = null;
-        let ncfPrefix = client_rnc ? 'B01' : 'B02'; // B01 for Tax Credit (with RNC), B02 for Consumer Final
+        let ncfPrefix = client_rnc ? 'B01' : 'B02';
 
-        // Generate Appointment Code (6 chars: Uppercase + numbers)
+        // Generador de Código de Cita
         const generateAppointmentCode = () => {
-            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
             let code = '';
-            for (let i = 0; i < 6; i++) {
-                code += chars.charAt(Math.floor(Math.random() * chars.length));
-            }
+            for (let i = 0; i < 6; i++) { code += chars.charAt(Math.floor(Math.random() * chars.length)); }
             return code;
         };
         const appointmentCode = generateAppointmentCode();
 
-        // 1. Validation Logic
+        // 1. Lógica de Validación (PayPal)
         if (paymentMethod === "paypal") {
             if (!orderID) throw new Error("Missing PayPal Order ID");
+            if (!PAYPAL_CLIENT_ID || !PAYPAL_SECRET) throw new Error("Server PayPal credentials missing");
 
-            // Verify with PayPal
+            console.log(`Verifying PayPal Order: ${orderID} in ${PAYPAL_API_BASE}`);
+
+            // A. Obtener Token
             const auth = btoa(`${PAYPAL_CLIENT_ID}:${PAYPAL_SECRET}`);
             const tokenRes = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
                 method: "POST",
                 body: "grant_type=client_credentials",
-                headers: { Authorization: `Basic ${auth}` },
+                headers: { Authorization: `Basic ${auth}`, "Content-Type": "application/x-www-form-urlencoded" },
             });
+
+            if (!tokenRes.ok) {
+                const errText = await tokenRes.text();
+                console.error("PayPal Token Error:", errText);
+                throw new Error("Error autenticando con PayPal. Revise credenciales del servidor.");
+            }
             const tokenData = await tokenRes.json();
 
+            // B. Obtener Detalles de la Orden
             const orderRes = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${orderID}`, {
                 headers: { Authorization: `Bearer ${tokenData.access_token}` },
             });
             const orderJson = await orderRes.json();
 
+            // C. Validación Estricta
+            if (!orderRes.ok) {
+                console.error("PayPal API Error Response:", JSON.stringify(orderJson));
+                throw new Error(`PayPal rechazó la verificación: ${orderJson.message || 'Error desconocido'}`);
+            }
+
+            console.log("PayPal Status:", orderJson.status);
+
             if (orderJson.status !== "COMPLETED" && orderJson.status !== "APPROVED") {
-                throw new Error(`PayPal Order status is ${orderJson.status}`);
+                throw new Error(`El pago no está completado. Estado actual: ${orderJson.status}`);
             }
 
             paymentStatus = "confirmed";
-            transactionId = orderJson.id; // Confirm ID
-        } else if (paymentMethod === "transfer") {
-            // Skip validation for now, manual review
-            paymentStatus = "pending";
+            transactionId = orderJson.id;
         }
 
-        // 2. Fiscal Generation (NCF)
+        // 2. Generación Fiscal (NCF)
         if (paymentStatus === "confirmed" || paymentMethod === "transfer") {
-            // Logic: If client_rnc is present, use Tax Credit (01), else Consumer Final (02)
-            // Check config/env for Electronic (E) vs Standard (B) - Defaulting to B for now as per requirements unless 'E' specified.
-            // User prompt: "Standard: B01. Electronic: E31... If client_rnc is null -> Standard: B02. Electronic: E32."
-            // We will assume "Standard" by default unless we detect we are in "Electronic" mode. 
-            // Ideally this should be an ENV var. Let's assume standard 'B' unless we add an env for 'E'.
-
             const IS_ELECTRONIC = Deno.env.get("ENABLE_ELECTRONIC_NCF") === "true";
-
-            if (client_rnc) {
-                ncfPrefix = IS_ELECTRONIC ? 'E31' : 'B01';
-            } else {
-                ncfPrefix = IS_ELECTRONIC ? 'E32' : 'B02';
-            }
+            ncfPrefix = client_rnc ? (IS_ELECTRONIC ? 'E31' : 'B01') : (IS_ELECTRONIC ? 'E32' : 'B02');
 
             const { data: ncf, error: ncfError } = await supabase.rpc('get_next_ncf', { p_prefix: ncfPrefix });
-
-            if (ncfError || !ncf) {
+            
+            if (ncfError) {
                 console.error("NCF Error:", ncfError);
-                throw new Error("Error generando comprobante fiscal (NCF). Secuencia agotada o error de sistema.");
+                throw new Error("Error generando NCF: Secuencia agotada o error interno.");
             }
+            if (!ncf) throw new Error("No se pudo obtener una secuencia NCF válida.");
+            
             ncfNumber = ncf;
         }
 
-        // Fetch Company Snapshot
+        // 3. Asignar Abogado
+        let assignedLawyerId = null;
+        const { data: activeLawyer } = await supabase.from('lawyers').select('id').eq('is_active', true).limit(1).single();
+        if (activeLawyer) assignedLawyerId = activeLawyer.id;
+
+        // Snapshot RNC Empresa
         let companyRncSnapshot = null;
         if (paymentStatus === "confirmed") {
-            const { data: settings } = await supabase.from('company_settings').select('rnc').limit(1).single();
+            const { data: settings } = await supabase.from('company_settings').select('rnc').single();
             if (settings) companyRncSnapshot = settings.rnc;
         }
 
-        // --- NEW: ASSIGN DEFAULT LAWYER ---
-        // Find the first active lawyer to assign
-        let assignedLawyerId = null;
-        const { data: activeLawyer } = await supabase
-            .from('lawyers')
-            .select('id')
-            .eq('is_active', true)
-            .limit(1)
-            .single();
-
-        if (activeLawyer) {
-            assignedLawyerId = activeLawyer.id;
-        }
-        // -----------------------------------
-
-        // 3. Database Transaction
-        // Insert Appointment
+        // 4. Guardar Cita
         const { data: newAppointment, error: appError } = await supabase
             .from('appointments')
             .insert([{
@@ -133,12 +126,11 @@ serve(async (req) => {
                 appointment_code: appointmentCode,
                 lawyer_id: assignedLawyerId
             }])
-            .select()
-            .single();
+            .select().single();
 
-        if (appError) throw new Error(`Error saving appointment: ${appError.message}`);
+        if (appError) throw new Error(`Error guardando cita: ${appError.message}`);
 
-        // Insert Payment
+        // 5. Guardar Pago
         const { data: newPayment, error: payError } = await supabase
             .from('payments')
             .insert([{
@@ -149,60 +141,30 @@ serve(async (req) => {
                 status: paymentStatus,
                 transaction_id: transactionId,
                 ncf_number: ncfNumber,
-                ncf_type: ncfNumber ? ncfPrefix : null, // Store the 3-char prefix
+                ncf_type: ncfNumber ? ncfPrefix : null,
                 proof_url: paymentData?.proof_url,
                 company_rnc_snapshot: companyRncSnapshot,
                 client_rnc: client_rnc || null
             }])
-            .select() // Select to get ID for logging
-            .single();
+            .select().single();
 
-        if (payError) throw new Error(`Error saving payment: ${payError.message}`);
+        if (payError) throw new Error(`Error guardando pago: ${payError.message}`);
 
-        // 4. Log NCF Issuance
+        // 6. Log y Hooks
         if (ncfNumber) {
-            const { error: logError } = await supabase
-                .from('ncf_issuance_log')
-                .insert([{
-                    ncf_code: ncfNumber,
-                    ncf_type: ncfPrefix,
-                    client_rnc: client_rnc || null,
-                    client_name: appointmentData.client_name,
-                    payment_id: newPayment.id,
-                    issued_at: new Date().toISOString(),
-                    amount: appointmentData.total_price
-                }]);
-
-            if (logError) console.error("Error logging NCF:", logError);
-            // Non-blocking error for log
+            await supabase.from('ncf_issuance_log').insert([{
+                ncf_code: ncfNumber, ncf_type: ncfPrefix, client_rnc: client_rnc || null,
+                client_name: appointmentData.client_name, payment_id: newPayment.id,
+                issued_at: new Date().toISOString(), amount: appointmentData.total_price
+            }]);
         }
 
-
-
-        // 4. Trigger Integrations (Async)
-
-        // Email (Fire and forget, or await if critical)
-        // We already have send-booking-confirmation. Let's invoke it.
         await supabase.functions.invoke('send-booking-confirmation', {
-            body: {
-                appointment: newAppointment,
-                payment: {
-                    method: paymentMethod,
-                    amount: appointmentData.total_price,
-                    currency: 'USD',
-                    ncf_number: ncfNumber
-                }
-            }
+            body: { appointment: newAppointment, payment: { method: paymentMethod, amount: appointmentData.total_price, currency: 'USD', ncf_number: ncfNumber } }
         });
 
-        // Zoho Sync (Fire and forget)
-        // Calling the function we are about to create
         if (paymentStatus === "confirmed") {
-            supabase.functions.invoke('zoho-sync', {
-                body: {
-                    appointment: newAppointment
-                }
-            });
+            supabase.functions.invoke('zoho-sync', { body: { appointment: newAppointment } });
         }
 
         return new Response(
@@ -211,15 +173,11 @@ serve(async (req) => {
         );
 
     } catch (error: any) {
-        console.error(error);
-
+        console.error("Process Payment Error:", error);
         let errorMessage = error.message;
-
-        // Catch specific NCF exhausted error from database function
-        if (errorMessage.includes("Secuencia NCF agotada") || errorMessage.includes("Sequences exhausted") || errorMessage.includes("agotada")) {
-            errorMessage = "No hay facturas disponibles para este tipo de cliente. Por favor contacte a soporte.";
+        if (errorMessage.includes("Secuencia NCF agotada") || errorMessage.includes("agotada")) {
+            errorMessage = "No hay facturas disponibles. Contacte soporte.";
         }
-
         return new Response(
             JSON.stringify({ error: errorMessage }),
             { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } },

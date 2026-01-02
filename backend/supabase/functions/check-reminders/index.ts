@@ -59,17 +59,25 @@ serve(async (req) => {
             // Preferencia del abogado (o 20 min por defecto)
             const reminderMinutes = appt.lawyer.reminder_minutes_before || 20;
 
+            const isoTime = appt.time.includes('T') ? appt.time : `T${appt.time}`;
+            
             // Construir fecha completa
-            const dateTimeString = `${appt.date} ${appt.time}`;
+            const dateTimeString = `${appt.date}${isoTime}-04:00`;
             const apptTime = new Date(dateTimeString);
 
-            if (isNaN(apptTime.getTime())) continue;
+            if (isNaN(apptTime.getTime())) {
+                console.error(`Error parseando fecha: ${dateTimeString}`);
+                continue;
+            }
 
             const diffMs = apptTime.getTime() - now.getTime();
             const diffMins = Math.round(diffMs / 60000);
 
+            console.log(`Cita: ${appt.time}, Faltan: ${diffMins} min. Rango esperado: ${reminderMinutes-5} a ${reminderMinutes+5}`);
+
             // Ventana de Tiempo [Preferencia - 5, Preferencia + 5]
-            if (diffMins >= (reminderMinutes - 5) && diffMins <= (reminderMinutes + 5)) {
+            //if (diffMins >= (reminderMinutes - 5) && diffMins <= (reminderMinutes + 5)) {
+            if (diffMins <= (reminderMinutes + 5) && diffMins > 0) {
 
                 // --- EMAIL TEMPLATE ---
                 const htmlContent = `

@@ -1,3 +1,38 @@
+/**
+ * Formatea una fecha evitando el error de zona horaria (día anterior).
+ * Convierte "YYYY-MM-DD" directamente a fecha local.
+ * @param dateInput String "YYYY-MM-DD" o Objeto Date
+ * @param longFormat Si es true, devuelve "Viernes, 2 de Enero..."
+ * @returns String formateado (Ej: "02/01/2026")
+ */
+export const formatDate = (dateInput: string | Date, longFormat: boolean = false): string => {
+    if (!dateInput) return '';
+
+    let date: Date;
+
+    if (typeof dateInput === 'string') {
+        // Corrección de Zona Horaria: Crear fecha localmente
+        if (dateInput.includes('-') && !dateInput.includes(':')) {
+            const [year, month, day] = dateInput.split('-').map(Number);
+            date = new Date(year, month - 1, day);
+        } else {
+            date = new Date(dateInput);
+        }
+    } else {
+        date = dateInput;
+    }
+
+    if (isNaN(date.getTime())) return '';
+
+    // CAMBIO AQUÍ: Usamos 'numeric' en lugar de '2-digit'
+    // 'numeric' -> 1/1/2026
+    // '2-digit' -> 01/01/2026
+    const options: Intl.DateTimeFormatOptions = longFormat 
+        ? { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
+        : { day: 'numeric', month: 'numeric', year: 'numeric' };
+
+    return date.toLocaleDateString('es-DO', options);
+};
 
 /**
  * Formats a time string or date into "hh:mm a" format (e.g., "04:30 PM").
@@ -65,12 +100,8 @@ export const generateWhatsAppLink = (
 ): string => {
     const cleanPhone = phone.replace(/\D/g, '');
 
-    // Format date nicely if possible
-    let formattedDate = dateStr;
-    try {
-        formattedDate = new Date(dateStr).toLocaleDateString('es-DO', { weekday: 'long', day: 'numeric', month: 'long' });
-    } catch (e) { /* ignore */ }
-
+    // Usamos la nueva función para asegurar que el día sea correcto en el mensaje también
+    const formattedDate = formatDate(dateStr, true); // true para formato largo
     const formattedTime = formatTime12Hour(timeStr);
 
     const message = `Saludos ${clientName}, le escribimos de ${companyName} con relación a su cita agendada para el ${formattedDate} a las ${formattedTime}. ¿Tiene alguna consulta previa?`;

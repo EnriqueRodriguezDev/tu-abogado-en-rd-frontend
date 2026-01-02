@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '../../supabaseClient';
+
 import {
     Calendar, CheckCircle, Clock, DollarSign,
     MessageCircle, FileText, Loader2, Send, CreditCard, Image, Eye, XCircle, Search
 } from 'lucide-react';
-import { formatTime, generateWhatsAppLink } from '../../utils/formatters';
+import { isWithinInterval, startOfDay, endOfDay, parseISO } from 'date-fns';
+
+import { DateRangeFilter } from '../../components/admin/DateRangeFilter';
+import type { DateRange } from 'react-day-picker';
+import { formatTime, generateWhatsAppLink, formatDate } from '../../utils/formatters';
 import { generateInvoicePDF } from '../../utils/invoiceGenerator';
 import { AlertModal, ConfirmDialog, BaseModal } from '../../components/ui/Modal';
 import { Tooltip } from '../../components/ui/Tooltip';
@@ -36,10 +41,18 @@ const Dashboard = () => {
         }[];
     }
 
+
     const [appointments, setAppointments] = useState<DashboardAppointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState('');
+    
+    // New Date Filter State
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({ 
+        from: new Date(), 
+        to: new Date() 
+    });
+    const [activePreset, setActivePreset] = useState('today');
 
     // Modal State
     const [alert, setAlert] = useState({ isOpen: false, title: '', message: '' });
@@ -251,22 +264,34 @@ const Dashboard = () => {
     };
 
     const filteredAppointments = appointments.filter(app => {
-        if (filterStatus === 'all') return true;
-        if (filterStatus === 'pending') {
-            return app.status === 'pending' || app.status === 'pending_payment';
+        // 1. Status Check
+        if (filterStatus !== 'all' && filterStatus === 'pending' && !(app.status === 'pending' || app.status === 'pending_payment')) return false;
+        if (filterStatus !== 'all' && filterStatus !== 'pending' && app.status !== filterStatus) return false;
+
+        // 2. Search Check
+        if (searchTerm) {
+            const term = searchTerm.toLowerCase();
+            const price = app.payments?.[0]?.amount?.toString() || '';
+            const matchesSearch = (
+                app.client_name.toLowerCase().includes(term) ||
+                app.client_email.toLowerCase().includes(term) ||
+                app.appointment_code?.toLowerCase().includes(term) ||
+                app.date.includes(term) ||
+                price.includes(term)
+            );
+            if (!matchesSearch) return false;
         }
-        return app.status === filterStatus;
-    }).filter(app => {
-        if (!searchTerm) return true;
-        const term = searchTerm.toLowerCase();
-        const price = app.payments?.[0]?.amount?.toString() || '';
-        return (
-            app.client_name.toLowerCase().includes(term) ||
-            app.client_email.toLowerCase().includes(term) ||
-            app.appointment_code?.toLowerCase().includes(term) ||
-            app.date.includes(term) ||
-            price.includes(term)
-        );
+
+        // 3. Date Check (CRITICAL)
+        if (dateRange?.from) {
+             const appDate = parseISO(app.date);
+             const start = startOfDay(dateRange.from);
+             const end = endOfDay(dateRange.to || dateRange.from);
+             
+             if (!isWithinInterval(appDate, { start, end })) return false;
+        }
+
+        return true;
     });
 
     return (
@@ -314,10 +339,22 @@ const Dashboard = () => {
                     <h3 className="text-xl font-bold text-navy-900 dark:text-gold-500 flex items-center gap-2">
                         <FileText size={20} /> Citas Recientes
                     </h3>
-                    <div className="flex gap-2 bg-gray-50 dark:bg-navy-900 p-1 rounded-xl">
-                        <button onClick={() => setFilterStatus('all')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterStatus === 'all' ? 'bg-white dark:bg-navy-700 shadow-sm text-navy-900 dark:text-white' : 'text-gray-500'}`}>Todos</button>
-                        <button onClick={() => setFilterStatus('confirmed')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterStatus === 'confirmed' ? 'bg-white dark:bg-navy-700 shadow-sm text-green-600' : 'text-gray-500'}`}>Confirmados</button>
-                        <button onClick={() => setFilterStatus('pending')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all ${filterStatus === 'pending' ? 'bg-white dark:bg-navy-700 shadow-sm text-orange-600' : 'text-gray-500'}`}>Pendientes</button>
+                    <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
+                        
+                         {/* High-End Date Filter */}
+                         <DateRangeFilter 
+                            dateRange={dateRange} 
+                            onChange={setDateRange}
+                            activePreset={activePreset}
+                            onPresetChange={setActivePreset}
+                        />
+
+                        {/* Status Filter */}
+                        <div className="flex gap-2 bg-gray-50 dark:bg-navy-900 p-1 rounded-xl w-full md:w-auto overflow-x-auto">
+                            <button onClick={() => setFilterStatus('all')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${filterStatus === 'all' ? 'bg-white dark:bg-navy-700 shadow-sm text-navy-900 dark:text-white' : 'text-gray-500'}`}>Todos</button>
+                            <button onClick={() => setFilterStatus('confirmed')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${filterStatus === 'confirmed' ? 'bg-white dark:bg-navy-700 shadow-sm text-green-600' : 'text-gray-500'}`}>Confirmados</button>
+                            <button onClick={() => setFilterStatus('pending')} className={`px-4 py-2 rounded-lg text-sm font-bold transition-all whitespace-nowrap ${filterStatus === 'pending' ? 'bg-white dark:bg-navy-700 shadow-sm text-orange-600' : 'text-gray-500'}`}>Pendientes</button>
+                        </div>
                     </div>
                 </div>
 
@@ -353,7 +390,7 @@ const Dashboard = () => {
                             ) : filteredAppointments.map((apt) => (
                                 <tr key={apt.id} className="hover:bg-gray-50 dark:hover:bg-navy-700/50 transition-colors group">
                                     <td className="p-6">
-                                        <div className="font-bold text-navy-900 dark:text-white">{new Date(apt.date).toLocaleDateString()}</div>
+                                        <div className="font-bold text-navy-900 dark:text-white">{formatDate(apt.date)}</div>
                                         <div className="text-xs text-gray-500">{formatTime(apt.time)}</div>
                                     </td>
                                     <td className="p-6">
