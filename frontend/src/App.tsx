@@ -15,13 +15,16 @@ import AdminLayout from './components/admin/AdminLayout';
 import { RequireAuth } from './components/auth/RequireAuth';
 
 // Placeholder Pages
-const Dashboard = () => <div><h1 className="text-2xl font-bold mb-4">Dashboard</h1><p>Próximamente: Lista de reservas</p></div>;
+import Dashboard from './pages/admin/Dashboard';
 import ServicesManager from './pages/admin/ServicesManager';
 import BlogManager from './pages/admin/BlogManager';
+import CompanySettings from './pages/admin/CompanySettings';
+import InvoicesManager from './pages/admin/InvoicesManager';
+import NCFManager from './pages/admin/NCFManager';
 //const ProductManager = () => <div><h1 className="text-2xl font-bold mb-4">Productos</h1><p>Próximamente: Gestión de productos</p></div>;
 //const BlogManager = () => <div><h1 className="text-2xl font-bold mb-4">Blog CMS</h1><p>Próximamente: Editor de artículos</p></div>;
 const PaymentLinks = () => <div><h1 className="text-2xl font-bold mb-4">Links de Pago</h1><p>Próximamente: Generador de links</p></div>;
-const Settings = () => <div><h1 className="text-2xl font-bold mb-4">Configuración</h1><p>Próximamente: Ajustes del admin</p></div>;
+// const Settings = () => <div><h1 className="text-2xl font-bold mb-4">Configuración</h1><p>Próximamente: Ajustes del admin</p></div>;
 
 function App() {
   return (
@@ -51,7 +54,9 @@ function App() {
           <Route path="services" element={<ServicesManager />} />
           <Route path="blog" element={<BlogManager />} />
           <Route path="payment-links" element={<PaymentLinks />} />
-          <Route path="settings" element={<Settings />} />
+          <Route path="company-settings" element={<CompanySettings />} />
+          <Route path="invoices" element={<InvoicesManager />} />
+          <Route path="ncf" element={<NCFManager />} />
         </Route>
       </Routes>
     </Router>

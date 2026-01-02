@@ -10,7 +10,10 @@ import {
     Scale,
     Settings,
     Menu,
-    X
+    X,
+    Building2,
+    Receipt,
+    Barcode
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -35,6 +38,9 @@ const AdminLayout = () => {
         { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Servicios', href: '/admin/services', icon: ShoppingBag },
         { name: 'Blog', href: '/admin/blog', icon: FileText },
+        { name: 'Facturas', href: '/admin/invoices', icon: Receipt },
+        { name: 'Gestión NCF', href: '/admin/ncf', icon: Barcode },
+        { name: 'Empresa', href: '/admin/company-settings', icon: Building2 },
         { name: 'Links de Pago', href: '/admin/payment-links', icon: LinkIcon },
     ];
 
@@ -44,14 +50,14 @@ const AdminLayout = () => {
         <div className="min-h-[100dvh] bg-slate-100 flex overflow-hidden">
             {/* Mobile Sidebar Overlay */}
             {isSidebarOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-in fade-in duration-200"
                     onClick={() => setIsSidebarOpen(false)}
                 />
             )}
 
             {/* Sidebar */}
-            <aside 
+            <aside
                 className={`
                     fixed md:static inset-y-0 left-0 z-50 w-64 bg-navy-900 text-white flex flex-col h-[100dvh] md:h-screen transition-transform duration-300 ease-out shadow-xl
                     ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
@@ -66,7 +72,7 @@ const AdminLayout = () => {
                         </div>
                     </div>
                     {/* Close Button for Mobile */}
-                    <button 
+                    <button
                         onClick={() => setIsSidebarOpen(false)}
                         className="md:hidden text-gray-400 hover:text-white p-1 rounded-full hover:bg-white/10"
                     >
@@ -107,7 +113,7 @@ const AdminLayout = () => {
                 {/* Top Header */}
                 <header className="bg-white h-16 shadow-sm flex items-center justify-between md:justify-end px-4 md:px-8 gap-4 flex-none z-10 relative">
                     {/* Hamburger Button */}
-                    <button 
+                    <button
                         onClick={() => setIsSidebarOpen(true)}
                         className="md:hidden p-2 -ml-2 text-gray-600 hover:bg-gray-100 rounded-lg"
                     >

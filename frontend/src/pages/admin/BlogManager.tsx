@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Plus, Trash2, Image as ImageIcon, Loader2, Edit, X, Calendar, Type, FileText, ChevronDown, Sparkles, Globe } from 'lucide-react';
-import ReactQuill from 'react-quill';
-import 'react-quill/dist/quill.snow.css';
+import ReactQuill from 'react-quill-new';
+import 'react-quill-new/dist/quill.snow.css';
 
 const BlogManager = () => {
     interface BlogPost {
@@ -135,13 +135,13 @@ const BlogManager = () => {
         setTranslating(true);
         try {
             if (targetLang === 'en') {
-                 if (title && !titleEn) {
+                if (title && !titleEn) {
                     const res = await generateWithAI('translate-content', title);
                     if (res) setTitleEn(res);
                 }
                 if (content && !contentEn) {
-                     const res = await generateWithAI('translate-content', content);
-                     if (res) setContentEn(res);
+                    const res = await generateWithAI('translate-content', content);
+                    if (res) setContentEn(res);
                 }
             } else {
                 // Translate EN -> ES
@@ -150,8 +150,8 @@ const BlogManager = () => {
                     if (res) setTitle(res);
                 }
                 if (contentEn && !content) {
-                     const res = await generateWithAI('translate-content', contentEn);
-                     if (res) setContent(res);
+                    const res = await generateWithAI('translate-content', contentEn);
+                    if (res) setContent(res);
                 }
             }
         } catch (error) {
@@ -161,7 +161,7 @@ const BlogManager = () => {
             setTranslating(false);
         }
     }, [title, titleEn, content, contentEn, generateWithAI]);
-    
+
     // Auto-trigger translation when switching tabs if content is missing
     useEffect(() => {
         if (activeTab === 'en') {
@@ -170,7 +170,7 @@ const BlogManager = () => {
             }
         } else {
             // Switching to Spanish, if spanish is empty but english exists
-             if ((titleEn && !title) || (contentEn && !content)) {
+            if ((titleEn && !title) || (contentEn && !content)) {
                 handleTranslate('es');
             }
         }
@@ -179,7 +179,7 @@ const BlogManager = () => {
     const handleAIImage = async () => {
         if (!title) return alert('Por favor escribe un título primero.');
         const prompt = await generateWithAI('generate-image-prompt', title);
-        
+
         if (prompt) {
             const encodedPrompt = encodeURIComponent(prompt);
             const imageUrl = `https://pollinations.ai/p/${encodedPrompt}?width=800&height=600&seed=${Math.random()}&model=flux`;
@@ -191,23 +191,23 @@ const BlogManager = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setUploading(true);
-        
+
         let finalTitleEn = titleEn;
         let finalContentEn = contentEn;
-        
+
         // Ensure translation before save if missing
         if ((title && !titleEn) || (content && !contentEn)) {
-             setTranslating(true);
-             try {
+            setTranslating(true);
+            try {
                 const promises = [];
                 if (title && !titleEn) promises.push(generateWithAI('translate-content', title).then(res => { if (res) finalTitleEn = res; }));
                 if (content && !contentEn) promises.push(generateWithAI('translate-content', content).then(res => { if (res) finalContentEn = res; }));
                 await Promise.all(promises);
-             } catch (e) {
-                 console.error("Auto-translation failed", e);
-             } finally {
-                 setTranslating(false);
-             }
+            } catch (e) {
+                console.error("Auto-translation failed", e);
+            } finally {
+                setTranslating(false);
+            }
         }
 
         let imageUrl = '';
@@ -221,7 +221,7 @@ const BlogManager = () => {
             }
         } else if (imagePreview && imagePreview.startsWith('http')) {
             // AI generated URL or existing URL - prioritizing AI which sets preview
-             imageUrl = imagePreview;
+            imageUrl = imagePreview;
         } else if (editingId) {
             // Keep existing image if no new file is selected and no AI url
             const existingPost = posts.find((p) => p.id === editingId);
@@ -315,10 +315,10 @@ const BlogManager = () => {
 
     const modules = {
         toolbar: [
-          [{ 'header': [1, 2, 3, false] }],
-          ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-          [{'list': 'ordered'}, {'list': 'bullet'}, {'indent': '-1'}, {'indent': '+1'}],
-          ['link', 'clean']
+            [{ 'header': [1, 2, 3, false] }],
+            ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+            [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'indent': '-1' }, { 'indent': '+1' }],
+            ['link', 'clean']
         ],
     };
 
@@ -349,7 +349,7 @@ const BlogManager = () => {
                     <article key={post.id} className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 hover:shadow-md transition-all overflow-hidden group flex flex-col h-full relative">
                         {/* Actions Overlay */}
                         <div className="absolute top-3 right-3 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-2">
-                             <button onClick={() => startEdit(post)} className="p-2 bg-white/90 dark:bg-navy-900/90 text-navy-900 dark:text-gold-500 rounded-lg hover:scale-110 transition-transform shadow-sm backdrop-blur-sm">
+                            <button onClick={() => startEdit(post)} className="p-2 bg-white/90 dark:bg-navy-900/90 text-navy-900 dark:text-gold-500 rounded-lg hover:scale-110 transition-transform shadow-sm backdrop-blur-sm">
                                 <Edit size={16} />
                             </button>
                             <button onClick={() => handleDelete(post.id)} className="p-2 bg-white/90 dark:bg-navy-900/90 text-red-500 rounded-lg hover:scale-110 transition-transform shadow-sm backdrop-blur-sm">
@@ -377,7 +377,7 @@ const BlogManager = () => {
                                 {new Date(post.created_at).toLocaleDateString()}
                             </div>
                             <h3 className="text-lg font-bold text-navy-900 dark:text-white mb-2 line-clamp-2 leading-tight">{post.title}</h3>
-                            <div className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-3 flex-1 prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{__html: post.content}} />
+                            <div className="text-gray-500 dark:text-gray-400 text-sm mb-4 line-clamp-3 flex-1 prose prose-sm dark:prose-invert" dangerouslySetInnerHTML={{ __html: post.content }} />
                         </div>
                     </article>
                 ))}
@@ -398,16 +398,16 @@ const BlogManager = () => {
                                 </h3>
                                 <p className="text-xs text-gray-400 dark:text-gray-500">Comparte conocimiento legal.</p>
                             </div>
-                            
+
                             <div className="flex bg-gray-100 dark:bg-navy-800 rounded-lg p-1">
-                                <button 
+                                <button
                                     onClick={() => setActiveTab('es')}
                                     type="button"
                                     className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'es' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-gold-500 shadow-sm' : 'text-gray-500 hover:text-navy-900 dark:hover:text-white'}`}
                                 >
                                     Español
                                 </button>
-                                <button 
+                                <button
                                     onClick={() => setActiveTab('en')}
                                     type="button"
                                     className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'en' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-gold-500 shadow-sm' : 'text-gray-500 hover:text-navy-900 dark:hover:text-white'}`}
@@ -517,9 +517,9 @@ const BlogManager = () => {
                                                     Redactar con IA
                                                 </button>
                                             </label>
-                                            <ReactQuill 
-                                                theme="snow" 
-                                                value={content} 
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={content}
                                                 onChange={setContent}
                                                 modules={modules}
                                                 className="bg-white dark:bg-navy-800 text-navy-900 dark:text-white rounded-xl"
@@ -563,9 +563,9 @@ const BlogManager = () => {
                                             <label className="text-sm font-bold text-navy-900 dark:text-gold-500 mb-2 flex items-center gap-2">
                                                 <FileText size={16} /> Content (EN)
                                             </label>
-                                            <ReactQuill 
-                                                theme="snow" 
-                                                value={contentEn} 
+                                            <ReactQuill
+                                                theme="snow"
+                                                value={contentEn}
                                                 onChange={setContentEn}
                                                 modules={modules}
                                                 className="bg-white dark:bg-navy-800 text-navy-900 dark:text-white rounded-xl"
@@ -575,7 +575,7 @@ const BlogManager = () => {
                                 )}
                             </form>
                         </div>
-                        
+
                         <div className="p-4 md:p-6 border-t border-gray-100 dark:border-navy-800 bg-gray-50 dark:bg-navy-900 flex gap-3 flex-none pb-[env(safe-area-inset-bottom)]">
                             <button
                                 type="button"

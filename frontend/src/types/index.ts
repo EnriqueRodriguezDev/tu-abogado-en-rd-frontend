@@ -29,7 +29,21 @@ export interface Service {
     name_en?: string;
     description_en?: string;
     content_en?: string;
+    variants?: ServiceVariant[];
 }
+
+export interface ServiceVariant {
+    id: string;
+    service_id: string;
+    name_es: string;
+    name_en: string;
+    duration_minutes: number;
+    price_usd: number;
+    price_dop: number;
+    is_active: boolean;
+    order_index: number;
+}
+
 
 export interface UserProfile {
     id: string;
@@ -38,3 +52,84 @@ export interface UserProfile {
     last_name?: string;
     created_at?: string;
 }
+
+// --- BOOKING TYPES ---
+
+export interface BookingStep {
+    id: number;
+    title: string;
+    icon: any; // Lucide icon type
+}
+
+export interface PricingTier {
+    duration: number;
+    priceUsd: number;
+    priceDop: number;
+    label?: string;
+    isBestValue?: boolean;
+}
+
+export interface TimeSlot {
+    time: string; // 12h format e.g. "09:00 AM"
+    available: boolean;
+}
+
+export interface ClientData {
+    name: string;
+    email: string;
+    phone: string;
+    reason: string;
+    rnc?: string;
+}
+
+export type PaymentMethod = 'paypal' | 'transfer' | 'azul' | 'cardnet';
+
+// --- DATABASE TYPES ---
+
+export interface Appointment {
+    id: string;
+    created_at: string;
+    date: string;
+    time: string;
+    duration_minutes: number;
+    meeting_type: 'whatsapp' | 'meet';
+    status: string;
+    client_name: string;
+    client_email: string;
+    client_phone: string;
+    reason: string;
+    total_price: number;
+    appointment_code?: string;
+}
+
+export type AppointmentInsert = Omit<Appointment, 'id' | 'created_at'>;
+
+export interface Payment {
+    id: string;
+    created_at: string;
+    appointment_id: string;
+    amount: number;
+    currency: string;
+    method: PaymentMethod;
+    status: string;
+    transaction_id?: string;
+    proof_url?: string;
+    ncf_number?: string;
+    rnc_client?: string;
+    company_rnc_snapshot?: string;
+}
+
+export type PaymentInsert = Omit<Payment, 'id' | 'created_at'>;
+
+export interface TaxSequence {
+    id: string;
+    created_at: string;
+    prefix: string; // e.g. B02
+    description: string;
+    current_value: number;
+    end_value: number;
+    expiration_date: string;
+    status: 'active' | 'expired' | 'depleted';
+    company_id?: number; // Optional link to company_settings
+}
+
