@@ -24,9 +24,10 @@ const Navbar = () => {
 
     const navigation = [
         { name: 'Inicio', href: '/', key: 'home' },
-        { name: 'Servicios', href: '/servicios', key: 'services' },
+        { name: 'Nosotros', href: '/about', key: 'about' },
+        { name: 'Servicios', href: '/services', key: 'services' },
+        { name: 'Utilidades', href: '/utilities', key: 'utilities' },
         { name: 'Blog', href: '/blog', key: 'blog' },
-        { name: 'Contacto', href: '/contacto', key: 'contact' },
     ];
 
     const isActive = (path: string) => location.pathname === path;
@@ -122,8 +123,8 @@ const Navbar = () => {
                                     to={item.href}
                                     onClick={() => setIsOpen(false)}
                                     className={`${isActive(item.href)
-                                            ? 'text-gold-500 bg-white/5'
-                                            : 'text-gray-300 hover:text-white hover:bg-white/5'
+                                        ? 'text-gold-500 bg-white/5'
+                                        : 'text-gray-300 hover:text-white hover:bg-white/5'
                                         } group flex items-center justify-between px-4 py-4 rounded-xl text-base font-medium transition-all duration-200 min-h-[50px]`}
                                 >
                                     {t(`nav.${item.key}`)}
@@ -152,7 +153,7 @@ const Navbar = () => {
                             </Link>
                         </div>
                     </div>
-                    
+
                     {/* Drawer Footer */}
                     <div className="p-6 text-center text-xs text-gray-500 border-t border-white/10">
                         &copy; 2024 TuAbogadoEnRD

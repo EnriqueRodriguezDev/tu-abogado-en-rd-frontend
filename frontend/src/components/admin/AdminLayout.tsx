@@ -14,7 +14,8 @@ import {
     Building2,
     Receipt,
     Barcode,
-    Users
+    Users,
+    Wrench
 } from 'lucide-react';
 
 const AdminLayout = () => {
@@ -38,6 +39,7 @@ const AdminLayout = () => {
     const navigation = [
         { name: 'Dashboard', href: '/admin/dashboard', icon: LayoutDashboard },
         { name: 'Servicios', href: '/admin/services', icon: ShoppingBag },
+        { name: 'Utilidades', href: '/admin/utilities', icon: Wrench },
         { name: 'Blog', href: '/admin/blog', icon: FileText },
         { name: 'Facturas', href: '/admin/invoices', icon: Receipt },
         { name: 'Gestión NCF', href: '/admin/ncf', icon: Barcode },

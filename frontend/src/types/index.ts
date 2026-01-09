@@ -25,6 +25,7 @@ export interface Service {
     icon_name?: string;
     icon?: string; // Legacy
     category: string;
+    is_visible?: boolean;
     // i18n fields
     name_en?: string;
     description_en?: string;
@@ -114,6 +115,7 @@ export interface Appointment {
     appointment_code?: string;
     lawyer_id?: string;
     lawyer?: Lawyer;
+    service_id?: string;
 }
 
 export type AppointmentInsert = Omit<Appointment, 'id' | 'created_at'>;
@@ -147,3 +149,18 @@ export interface TaxSequence {
     company_id?: number; // Optional link to company_settings
 }
 
+
+export interface Utility {
+    id: string;
+    created_at?: string;
+    title: string;
+    description: string;
+    image_url: string;
+    is_active?: boolean;
+    // i18n fields
+    title_en?: string;
+    description_en?: string;
+
+    link_url?: string;
+    link_text?: string;
+}

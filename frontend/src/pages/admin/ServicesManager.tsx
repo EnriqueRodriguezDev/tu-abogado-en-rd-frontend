@@ -27,6 +27,7 @@ const ServicesManager = () => {
     const [priceDop, setPriceDop] = useState('');
     const [priceUsd, setPriceUsd] = useState('');
     const [category, setCategory] = useState('Legal');
+    const [isVisible, setIsVisible] = useState(true);
     const [formImage, setFormImage] = useState<File | null>(null);
     const [imagePreview, setImagePreview] = useState<string | null>(null);
     const [uploading, setUploading] = useState(false);
@@ -214,6 +215,7 @@ const ServicesManager = () => {
 
     const handleSave = async () => {
         // Validation: Must have at least one variant
+        /*
         if (variants.length === 0) {
             setAlertConfig({
                 isOpen: true,
@@ -223,6 +225,7 @@ const ServicesManager = () => {
             setActiveModalTab('variants');
             return;
         }
+        */
 
         setUploading(true);
 
@@ -278,6 +281,7 @@ const ServicesManager = () => {
             price_dop: parseFloat(priceDop) || 0,
             price_usd: parseFloat(priceUsd) || 0,
             is_active: true,
+            is_visible: isVisible,
             icon_name: selectedIcon
         };
 
@@ -353,6 +357,7 @@ const ServicesManager = () => {
         setPriceDop(service.price_dop?.toString() || '');
         setPriceUsd(service.price_usd?.toString() || '');
         setCategory(service.category || 'Legal');
+        setIsVisible(service.is_visible !== false);
 
         // Variants
         setVariants(service.variants || []);
@@ -389,6 +394,7 @@ const ServicesManager = () => {
         setPriceDop('');
         setPriceUsd('');
         setCategory('Legal');
+        setIsVisible(true);
         setFormImage(null);
         setImagePreview(null);
         setSelectedIcon('Briefcase');
@@ -663,20 +669,35 @@ const ServicesManager = () => {
                                             </div>
                                         </div>
 
-                                        <div className="space-y-2">
-                                            <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center gap-2">
-                                                <Briefcase size={16} /> Categoría
-                                            </label>
-                                            <select
-                                                value={category}
-                                                onChange={(e) => setCategory(e.target.value)}
-                                                className="w-full bg-gray-50 dark:bg-navy-800 border-none text-navy-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold-500 outline-none"
-                                            >
-                                                <option value="Legal">Legal</option>
-                                                <option value="Inmigration">Inmigración</option>
-                                                <option value="Real Estate">Bienes Raíces</option>
-                                                <option value="Business">Negocios</option>
-                                            </select>
+                                        <div className="space-y-4">
+                                            <div className="space-y-2">
+                                                <label className="text-sm font-bold text-navy-900 dark:text-gold-500 flex items-center gap-2">
+                                                    <Briefcase size={16} /> Categoría
+                                                </label>
+                                                <select
+                                                    value={category}
+                                                    onChange={(e) => setCategory(e.target.value)}
+                                                    className="w-full bg-gray-50 dark:bg-navy-800 border-none text-navy-900 dark:text-white rounded-xl px-4 py-3 focus:ring-2 focus:ring-gold-500 outline-none"
+                                                >
+                                                    <option value="Legal">Legal</option>
+                                                    <option value="Inmigration">Inmigración</option>
+                                                    <option value="Real Estate">Bienes Raíces</option>
+                                                    <option value="Business">Negocios</option>
+                                                </select>
+                                            </div>
+
+                                            <div className="flex items-center gap-3 bg-gray-50 dark:bg-navy-800 p-3 rounded-xl">
+                                                <input
+                                                    type="checkbox"
+                                                    id="isVisible"
+                                                    checked={isVisible}
+                                                    onChange={(e) => setIsVisible(e.target.checked)}
+                                                    className="w-5 h-5 text-gold-500 rounded focus:ring-gold-500 border-gray-300"
+                                                />
+                                                <label htmlFor="isVisible" className="text-sm font-bold text-navy-900 dark:text-white select-none cursor-pointer">
+                                                    Visible en Catálogo
+                                                </label>
+                                            </div>
                                         </div>
 
                                         <div className="grid grid-cols-2 gap-4">
@@ -797,7 +818,10 @@ const ServicesManager = () => {
                             <button onClick={handleClose} disabled={uploading} className="flex-1 py-3.5 bg-transparent border border-gray-200 dark:border-navy-700 text-gray-500 dark:text-gray-400 font-bold rounded-xl hover:bg-gray-100 dark:hover:bg-navy-800 transition-colors">
                                 Cancelar
                             </button>
-                            <button onClick={handleSave} disabled={uploading || translating} className="flex-1 py-3.5 bg-gold-500 text-navy-900 font-bold rounded-xl hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20 flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                            <button onClick={handleSave}
+                                disabled={uploading || translating}
+                                className="flex-1 py-3.5 bg-gold-500 text-navy-900 font-bold rounded-xl hover:bg-gold-400 transition-colors shadow-lg shadow-gold-500/20 flex justify-center items-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            >
                                 {uploading || translating ? <Loader2 className="animate-spin" /> : (
                                     <>
                                         {translating ? 'Traduciendo...' : (editingId ? 'Guardar Cambios' : 'Guardar')}

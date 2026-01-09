@@ -10,6 +10,7 @@ const resources = {
                 about: 'About Us',
                 services: 'Services',
                 blog: 'Blog',
+                utilities: 'Utilities',
                 contact: 'Contact',
                 videoCons: 'Video Consultation'
             },
@@ -48,6 +49,9 @@ const resources = {
                 email: 'Email',
                 paymentMethod: 'Payment Method',
                 orCard: 'OR PAY WITH CARD'
+            },
+            services: {
+                accreditation: 'The cost of this video consultation will be credited to your legal service if you decide to hire us.'
             }
         }
     },
@@ -55,9 +59,11 @@ const resources = {
         translation: {
             nav: {
                 home: 'Inicio',
+                about: 'Nosotros',
                 services: 'Servicios',
                 blog: 'Blog',
                 contact: 'Contacto',
+                utilities: 'Utilidades',
                 videoCons: 'Videoconsulta'
             },
             hero: {
@@ -95,6 +101,9 @@ const resources = {
                 email: 'Correo Electrónico',
                 paymentMethod: 'Método de Pago',
                 orCard: 'O PAGA CON TARJETA'
+            },
+            services: {
+                accreditation: 'El costo de esta videoconsulta será acreditado al monto total de su servicio legal si decide contratarlo.'
             }
         }
     }

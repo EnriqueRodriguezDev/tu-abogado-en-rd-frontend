@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
 import { Calendar as CalendarIcon, Clock, DollarSign, User, CheckCircle, ChevronLeft, ChevronRight, Upload, ArrowRight, Loader2, CreditCard, AlertCircle, Briefcase } from 'lucide-react';
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
@@ -31,6 +32,16 @@ const Booking = () => {
     // Data State
     const [services, setServices] = useState<Service[]>([]);
     const [loadingServices, setLoadingServices] = useState(true);
+
+    // Router State
+    const location = useLocation();
+    const [preselectedServiceId, setPreselectedServiceId] = useState<string | null>(null);
+
+    useEffect(() => {
+        if (location.state && location.state.serviceId) {
+            setPreselectedServiceId(location.state.serviceId);
+        }
+    }, [location]);
 
     // Step 1: Service Selection
     // selectedService removed (unused)
@@ -276,8 +287,8 @@ const Booking = () => {
         };
 
         const { start, end } = config[timeFilter];
-        let current = start; 
-        
+        let current = start;
+
         // Obtenemos minutos actuales para comparar
         const now = new Date();
         const currentMinutes = now.getHours() * 60 + now.getMinutes();
@@ -323,10 +334,10 @@ const Booking = () => {
 
         // Mañana termina a las 12:00 PM
         if (tab === 'morning' && currentHour >= 12) return true;
-        
+
         // Tarde termina a las 5:00 PM (17:00)
         if (tab === 'afternoon' && currentHour >= 17) return true;
-        
+
         // Noche termina a las 9:00 PM (21:00) - Opcional, si quieres bloquear noche tarde
         if (tab === 'evening' && currentHour >= 21) return true;
 
@@ -352,7 +363,8 @@ const Booking = () => {
                 client_email: clientData.email,
                 client_phone: clientData.phone,
                 reason: clientData.reason,
-                total_price: totalPrice
+                total_price: totalPrice,
+                service_id: preselectedServiceId // Add tracked service ID
             };
 
             const { data, error } = await supabase.functions.invoke('process-payment', {
@@ -604,26 +616,26 @@ const Booking = () => {
             <div className="bg-gray-50 rounded-3xl p-6">
                 <div className="flex items-center justify-between mb-6">
                     <span className="font-bold text-gray-500 uppercase text-sm tracking-wider">Horarios</span>
-                        <div className="flex bg-white rounded-lg p-1 text-xs font-bold shadow-sm">
-                            {(['morning', 'afternoon', 'evening'] as const).map(f => {
-                                const disabled = isTabDisabled(f); // Verificar si está deshabilitado
-                                return (
-                                    <button 
-                                        key={f} 
-                                        onClick={() => !disabled && setTimeFilter(f)} 
-                                        disabled={disabled}
-                                        className={`
+                    <div className="flex bg-white rounded-lg p-1 text-xs font-bold shadow-sm">
+                        {(['morning', 'afternoon', 'evening'] as const).map(f => {
+                            const disabled = isTabDisabled(f); // Verificar si está deshabilitado
+                            return (
+                                <button
+                                    key={f}
+                                    onClick={() => !disabled && setTimeFilter(f)}
+                                    disabled={disabled}
+                                    className={`
                                             px-3 py-1.5 rounded-md transition-all 
                                             ${timeFilter === f ? 'bg-gray-100 text-navy-900 shadow-sm' : 'text-gray-400'}
                                             ${disabled ? 'opacity-30 cursor-not-allowed bg-gray-50 text-gray-300 decoration-slice' : 'hover:bg-gray-50'}
                                         `}
-                                    >
-                                        {f === 'morning' ? 'Mañana' : f === 'afternoon' ? 'Tarde' : 'Noche'}
-                                    </button>
-                                );
-                            })}
-                        </div>
+                                >
+                                    {f === 'morning' ? 'Mañana' : f === 'afternoon' ? 'Tarde' : 'Noche'}
+                                </button>
+                            );
+                        })}
                     </div>
+                </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     {generateTimeSlots().map(({ time, available }) => (
                         <button

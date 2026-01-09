@@ -83,7 +83,7 @@ const Contact = () => {
 
                 {/* Contact Form */}
                 <div className="bg-white dark:bg-navy-800 p-8 rounded-2xl shadow-xl animate-in slide-in-from-right duration-700">
-                    {status === 'success' ? (
+                    {/* {status === 'success' ? (
                         <div className="text-center py-12">
                             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
                                 <CheckCircle className="w-10 h-10 text-green-600" />
@@ -152,7 +152,10 @@ const Contact = () => {
                                 {status === 'loading' ? <Loader2 className="animate-spin" /> : <>Enviar Mensaje <Send size={18} /></>}
                             </button>
                         </form>
-                    )}
+                    )} */}
+                    <div className="text-center text-gray-500 dark:text-gray-400 py-12">
+                        <p>Por el momento, favor contactarnos vía telefónica o correo electrónico.</p>
+                    </div>
                 </div>
             </div>
         </div>

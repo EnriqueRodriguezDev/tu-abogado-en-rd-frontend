@@ -2,8 +2,10 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/layout/Layout';
 import Home from './pages/Home';
+import About from './pages/About';
 import Services from './pages/Services';
 import ServiceDetail from './pages/ServiceDetail';
+import Utilities from './pages/Utilities';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
@@ -17,6 +19,7 @@ import { RequireAuth } from './components/auth/RequireAuth';
 // Placeholder Pages
 import Dashboard from './pages/admin/Dashboard';
 import ServicesManager from './pages/admin/ServicesManager';
+import UtilitiesManager from './pages/admin/UtilitiesManager';
 import BlogManager from './pages/admin/BlogManager';
 import CompanySettings from './pages/admin/CompanySettings';
 import InvoicesManager from './pages/admin/InvoicesManager';
@@ -34,11 +37,13 @@ function App() {
         {/* Public Routes */}
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />
-          <Route path="servicios" element={<Services />} />
-          <Route path="servicios/:slug" element={<ServiceDetail />} />
+          <Route path="about" element={<About />} />
+          <Route path="services" element={<Services />} />
+          <Route path="services/:slug" element={<ServiceDetail />} />
+          <Route path="utilities" element={<Utilities />} />
           <Route path="blog" element={<Blog />} />
           <Route path="blog/:slug" element={<BlogPost />} />
-          <Route path="contacto" element={<Contact />} />
+          <Route path="contact" element={<Contact />} />
           <Route path="booking" element={<Booking />} />
         </Route>
 
@@ -53,6 +58,7 @@ function App() {
           <Route index element={<Navigate to="/admin/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="services" element={<ServicesManager />} />
+          <Route path="utilities" element={<UtilitiesManager />} />
           <Route path="blog" element={<BlogManager />} />
           <Route path="payment-links" element={<PaymentLinks />} />
           <Route path="company-settings" element={<CompanySettings />} />
