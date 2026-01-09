@@ -1,5 +1,6 @@
 import { Scale, Facebook, Instagram, Linkedin, Send, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../supabaseClient';
 
 const Footer = () => {
@@ -59,10 +60,9 @@ const Footer = () => {
                     <div>
                         <h3 className="font-serif font-bold text-lg mb-6 text-gold-500">Enlaces Rápidos</h3>
                         <ul className="space-y-4 text-gray-400">
-                            <li><a href="/" className="hover:text-white transition-colors">Inicio</a></li>
-                            <li><a href="/servicios" className="hover:text-white transition-colors">Servicios</a></li>
-                            <li><a href="/blog" className="hover:text-white transition-colors">Blog Legal</a></li>
-                            <li><a href="/contacto" className="hover:text-white transition-colors">Contacto</a></li>
+                            <li><Link to="/booking" className="hover:text-white transition-colors">Videoconsultas</Link></li>
+                            <li><Link to="/utilities" className="hover:text-white transition-colors">Utilidades</Link></li>
+                            <li><Link to="/blog" className="hover:text-white transition-colors">Blog</Link></li>
                         </ul>
                     </div>
 
@@ -110,8 +110,8 @@ const Footer = () => {
                 <div className="border-t border-navy-800 pt-8 flex flex-col md:flex-row justify-between items-center text-gray-500 text-sm">
                     <p>© 2024 TuAbogadoEnRD. Todos los derechos reservados.</p>
                     <div className="flex gap-6 mt-4 md:mt-0">
-                        <a href="#" className="hover:text-white transition-colors">Privacidad</a>
-                        <a href="#" className="hover:text-white transition-colors">Términos</a>
+                        <Link to="/legal/privacy" className="hover:text-white transition-colors">Privacidad</Link>
+                        <Link to="/legal/terms" className="hover:text-white transition-colors">Términos</Link>
                     </div>
                 </div>
             </div>

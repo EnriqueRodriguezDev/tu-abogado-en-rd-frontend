@@ -133,7 +133,7 @@ const About = () => {
                 </div>
             </section>
 
-            {/* Team Section */}
+            {/* Team Section 
             <section className="py-24 px-4">
                 <div className="max-w-7xl mx-auto">
                     <div className="flex items-center gap-3 mb-6 justify-center">
@@ -145,7 +145,7 @@ const About = () => {
                     </h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 justify-center">
-                        {/* Fake Lawyer 1 */}
+                        {/* Fake Lawyer 1 
                         <div className="bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-xl border border-gray-100 dark:border-navy-700 group">
                             <div className="h-80 overflow-hidden relative">
                                 <img
@@ -168,7 +168,7 @@ const About = () => {
                             </div>
                         </div>
 
-                        {/* Fake Lawyer 2 */}
+                        {/* Fake Lawyer 2 
                         <div className="bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-xl border border-gray-100 dark:border-navy-700 group">
                             <div className="h-80 overflow-hidden relative">
                                 <img
@@ -191,7 +191,7 @@ const About = () => {
                             </div>
                         </div>
 
-                        {/* Fake Lawyer 3 */}
+                        {/* Fake Lawyer 3
                         <div className="bg-white dark:bg-navy-800 rounded-2xl overflow-hidden shadow-xl border border-gray-100 dark:border-navy-700 group">
                             <div className="h-80 overflow-hidden relative">
                                 <img
@@ -215,7 +215,7 @@ const About = () => {
                         </div>
                     </div>
                 </div>
-            </section>
+            </section>*/}
         </div>
     );
 };

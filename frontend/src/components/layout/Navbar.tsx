@@ -35,13 +35,13 @@ const Navbar = () => {
     return (
         <nav className="bg-navy-900 text-white shadow-lg sticky top-0 z-50 pt-safe transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex justify-between h-20">
+                <div className="flex justify-between h-16">
                     <div className="flex items-center">
                         <Link to="/" className="flex-shrink-0 flex items-center gap-2" onClick={() => setIsOpen(false)}>
-                            <Scale className="h-8 w-8 text-gold-500" />
+                            <Scale className="h-7 w-7 text-gold-500" />
                             <div className="flex flex-col">
-                                <span className="font-serif text-xl font-bold tracking-wide leading-none">TuAbogadoEnRD</span>
-                                <span className="text-[10px] text-gray-300 uppercase tracking-wider">Asesoría Legal Dominicana</span>
+                                <span className="font-serif text-2xl font-bold tracking-wide leading-none">TuAbogadoEnRD</span>
+                                <span className="text-[15px] text-gray-300 uppercase tracking-wider">Asesoría Legal Dominicana</span>
                             </div>
                         </Link>
                     </div>
@@ -53,7 +53,7 @@ const Navbar = () => {
                                 key={item.name}
                                 to={item.href}
                                 className={`${isActive(item.href) ? 'text-gold-500' : 'text-gray-300 hover:text-white'
-                                    } px-3 py-2 text-sm font-medium transition-colors duration-200`}
+                                    } px-3 py-2 text-base font-medium transition-colors duration-200`}
                             >
                                 {t(`nav.${item.key}`)}
                             </Link>

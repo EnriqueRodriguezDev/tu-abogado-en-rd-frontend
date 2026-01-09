@@ -6,6 +6,7 @@ import About from './pages/About';
 import Services from './pages/Services';
 import ServiceDetail from './pages/ServiceDetail';
 import Utilities from './pages/Utilities';
+import Legal from './pages/Legal';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
 import Contact from './pages/Contact';
@@ -29,6 +30,7 @@ import LawyersManager from './pages/admin/LawyersManager';
 //const BlogManager = () => <div><h1 className="text-2xl font-bold mb-4">Blog CMS</h1><p>Próximamente: Editor de artículos</p></div>;
 const PaymentLinks = () => <div><h1 className="text-2xl font-bold mb-4">Links de Pago</h1><p>Próximamente: Generador de links</p></div>;
 // const Settings = () => <div><h1 className="text-2xl font-bold mb-4">Configuración</h1><p>Próximamente: Ajustes del admin</p></div>;
+import { CookieBanner } from './components/ui/CookieBanner';
 
 function App() {
   return (
@@ -45,6 +47,7 @@ function App() {
           <Route path="blog/:slug" element={<BlogPost />} />
           <Route path="contact" element={<Contact />} />
           <Route path="booking" element={<Booking />} />
+          <Route path="legal/:section?" element={<Legal />} />
         </Route>
 
         {/* Admin Routes */}
@@ -67,6 +70,7 @@ function App() {
           <Route path="lawyers" element={<LawyersManager />} />
         </Route>
       </Routes>
+      <CookieBanner />
     </Router>
   );
 }

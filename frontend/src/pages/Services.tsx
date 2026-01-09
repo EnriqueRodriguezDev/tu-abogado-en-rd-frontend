@@ -34,7 +34,7 @@ const Services = () => {
     return (
         <div className="bg-slate-50 min-h-screen">
             {/* Header */}
-            <div className="bg-navy-900 text-white py-20 text-center">
+            <div className="bg-navy-900 text-white py-10 text-center">
                 <h1 className="text-4xl lg:text-5xl font-serif font-bold mb-4 text-white">Áreas de Práctica</h1>
                 <p className="text-gray-300 max-w-2xl mx-auto px-4">
                     Ofrecemos asesoría legal integral con los más altos estándares de calidad y ética profesional.

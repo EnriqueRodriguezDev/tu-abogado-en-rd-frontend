@@ -77,7 +77,7 @@ const Utilities = () => {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-navy-900 transition-colors duration-300 font-sans">
             {/* Header Section */}
-            <div className="bg-[#0B1C3E] py-16 px-4 shadow-lg text-white">
+            <div className="bg-navy-900 py-10 px-4 shadow-lg text-white">
                 <div className="max-w-7xl mx-auto text-center space-y-6">
                     <h1 className="text-4xl md:text-5xl font-serif font-bold text-white">
                         {t('nav.utilities', 'Utility Tools')}

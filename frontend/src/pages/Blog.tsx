@@ -54,7 +54,7 @@ const Blog = () => {
     return (
         <div className="bg-slate-50 dark:bg-navy-900 min-h-screen font-sans transition-colors duration-300">
             {/* Hero Section */}
-            <div className="bg-navy-900 text-white pt-24 pb-16 px-4 text-center">
+            <div className="bg-navy-900 text-white pt-10 pb-16 px-4 text-center">
                 <h1 className="text-4xl md:text-5xl font-serif font-bold mb-4 text-white">Blog</h1>
                 <p className="text-gray-300 max-w-2xl mx-auto mb-8 font-light text-lg">
                     Información legal clara y actualizada para dominicanos, latinos y extranjeros.
@@ -93,9 +93,9 @@ const Blog = () => {
                         <div className="space-y-8">
                             {filteredPosts.map((post) => (
                                 /* 1. Envolvemos todo el artículo en el Link principal */
-                                <Link 
-                                    to={`/blog/${post.slug || post.id}`} 
-                                    key={post.id} 
+                                <Link
+                                    to={`/blog/${post.slug || post.id}`}
+                                    key={post.id}
                                     className="block group" // 'block' para estructura y 'group' para efectos hover
                                 >
                                     <article className="bg-white dark:bg-navy-800 cursor-pointer rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 overflow-hidden hover:shadow-lg transition-shadow duration-300 flex flex-col md:flex-row h-full">
@@ -121,9 +121,9 @@ const Blog = () => {
                                             </h3>
                                             <p className="text-gray-600 dark:text-gray-300 mb-6 line-clamp-3 leading-relaxed">
                                                 {/* Use content as excerpt if description not available, but stripping HTML would be better. For now just raw content */}
-                                                {getLocalizedField(post, 'content')} 
+                                                {getLocalizedField(post, 'content')}
                                             </p>
-                                            
+
                                             {/* 2. Cambiamos el Link interno por un span para evitar <a> dentro de <a> */}
                                             <span className="text-gold-600 font-bold text-sm tracking-wide uppercase flex items-center gap-2 group-hover:gap-3 transition-all self-start">
                                                 Leer más <ArrowRight size={16} />
