@@ -512,7 +512,7 @@ const Booking = () => {
                         <div className="w-full bg-white rounded-[2rem] border border-gray-100 hover:border-gold-300 transition-all overflow-hidden flex flex-col group">
 
                             {/* 1. TOP: Header */}
-                            <div className="p-8 bg-white relative z-10">
+                            <div className="p-5 md:p-8 bg-white relative z-10">
                                 <div className="flex flex-col md:flex-row md:items-start gap-6">
                                     {/* ICON: Comes from TARGET (Topic) */}
                                     <div className="p-4 bg-navy-50 rounded-2xl text-navy-900 group-hover:bg-gold-500 group-hover:text-white transition-all duration-300 shadow-sm flex-shrink-0">
@@ -541,7 +541,7 @@ const Booking = () => {
                             </div>
 
                             {/* 2. BOTTOM: Variants Grid */}
-                            <div className="p-8 bg-gray-50/80 border-t border-gray-100 flex-1">
+                            <div className="p-5 md:p-8 bg-gray-50/80 border-t border-gray-100 flex-1">
                                 <div className="flex items-center gap-4 mb-6">
                                     <div className="h-px bg-gray-200 flex-1"></div>
                                     <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
@@ -913,14 +913,14 @@ const Booking = () => {
                     <div ref={bookingCardRef} className="bg-white rounded-[2rem] shadow-2xl overflow-hidden border border-gray-100 relative">
                         {/* Header Steps */}
                         <div className="bg-navy-900 p-4 sticky top-0 z-30">
-                            <div className="flex justify-between max-w-2xl mx-auto px-4 relative">
-                                <div className="absolute top-1/2 left-4 right-4 h-0.5 bg-navy-700 -z-0 -translate-y-1/2"></div>
+                            <div className="flex justify-between md:justify-around max-w-2xl mx-auto px-1 md:px-4 relative overflow-x-auto md:overflow-visible custom-scrollbar pb-2 md:pb-0">
+                                <div className="hidden md:block absolute top-1/2 left-4 right-4 h-0.5 bg-navy-700 -z-0 -translate-y-1/2"></div>
                                 {STEPS.map((step) => (
-                                    <div key={step.id} className="relative z-10 flex flex-col items-center bg-navy-900 px-2">
+                                    <div key={step.id} className="relative z-10 flex flex-col items-center bg-navy-900 px-2 min-w-[70px] flex-shrink-0">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs transition-all ${currentStep === step.id ? 'bg-gold-500 text-navy-900 ring-4 ring-navy-800' : (currentStep > step.id ? 'bg-green-500 text-white' : 'bg-navy-700 text-gray-400')}`}>
                                             {currentStep > step.id ? <CheckCircle size={14} /> : step.id}
                                         </div>
-                                        <span className={`text-[10px] font-bold uppercase mt-1 ${currentStep === step.id ? 'text-gold-500' : 'text-gray-500'}`}>{step.title}</span>
+                                        <span className={`text-[10px] font-bold uppercase mt-1 whitespace-nowrap ${currentStep === step.id ? 'text-gold-500' : 'text-gray-500'}`}>{step.title}</span>
                                     </div>
                                 ))}
                             </div>

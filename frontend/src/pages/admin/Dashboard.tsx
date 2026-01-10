@@ -46,11 +46,11 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(true);
     const [filterStatus, setFilterStatus] = useState<string>('all');
     const [searchTerm, setSearchTerm] = useState('');
-    
+
     // New Date Filter State
-    const [dateRange, setDateRange] = useState<DateRange | undefined>({ 
-        from: new Date(), 
-        to: new Date() 
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(),
+        to: new Date()
     });
     const [activePreset, setActivePreset] = useState('today');
 
@@ -284,11 +284,11 @@ const Dashboard = () => {
 
         // 3. Date Check (CRITICAL)
         if (dateRange?.from) {
-             const appDate = parseISO(app.date);
-             const start = startOfDay(dateRange.from);
-             const end = endOfDay(dateRange.to || dateRange.from);
-             
-             if (!isWithinInterval(appDate, { start, end })) return false;
+            const appDate = parseISO(app.date);
+            const start = startOfDay(dateRange.from);
+            const end = endOfDay(dateRange.to || dateRange.from);
+
+            if (!isWithinInterval(appDate, { start, end })) return false;
         }
 
         return true;
@@ -297,8 +297,8 @@ const Dashboard = () => {
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
             {/* Header Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-gray-100 dark:border-navy-700 shadow-sm">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4 md:gap-6">
+                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-gray-100 dark:border-navy-700 shadow-sm h-auto">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider">Ingresos Totales</p>
@@ -309,7 +309,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-gray-100 dark:border-navy-700 shadow-sm">
+                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-gray-100 dark:border-navy-700 shadow-sm h-auto">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider">Citas Totales</p>
@@ -320,7 +320,7 @@ const Dashboard = () => {
                         </div>
                     </div>
                 </div>
-                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-gray-100 dark:border-navy-700 shadow-sm">
+                <div className="bg-white dark:bg-navy-800 p-6 rounded-2xl border border-gray-100 dark:border-navy-700 shadow-sm h-auto">
                     <div className="flex justify-between items-start">
                         <div>
                             <p className="text-gray-500 dark:text-gray-400 text-sm font-bold uppercase tracking-wider">Pendientes</p>
@@ -340,10 +340,10 @@ const Dashboard = () => {
                         <FileText size={20} /> Citas Recientes
                     </h3>
                     <div className="flex flex-col md:flex-row gap-4 items-center w-full md:w-auto">
-                        
-                         {/* High-End Date Filter */}
-                         <DateRangeFilter 
-                            dateRange={dateRange} 
+
+                        {/* High-End Date Filter */}
+                        <DateRangeFilter
+                            dateRange={dateRange}
                             onChange={setDateRange}
                             activePreset={activePreset}
                             onPresetChange={setActivePreset}
@@ -366,12 +366,65 @@ const Dashboard = () => {
                             placeholder="Buscar (Nombre, Código, Fecha...)"
                             value={searchTerm}
                             onChange={e => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 w-100 shadow-sm"
+                            className="pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-gold-500 w-100 shadow-sm w-full"
                         />
                     </div>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Mobile Cards View (Visible on Mobile, Hidden on Desktop) */}
+                <div className="md:hidden space-y-4 p-4 bg-gray-50 dark:bg-navy-900/50">
+                    {loading ? (
+                        <div className="text-center py-12"><Loader2 className="animate-spin mx-auto text-gold-500" /></div>
+                    ) : filteredAppointments.map((apt) => (
+                        <div key={apt.id} className="bg-white dark:bg-navy-800 p-5 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 flex flex-col gap-4">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <div className="font-bold text-navy-900 dark:text-white text-lg">{apt.client_name}</div>
+                                    <div className="text-sm text-gray-500">{formatDate(apt.date)} • {formatTime(apt.time)}</div>
+                                </div>
+                                {apt.status === 'confirmed' ? (
+                                    <span className="bg-green-100 text-green-700 px-2.5 py-1 rounded-lg text-xs font-bold"><CheckCircle size={14} /></span>
+                                ) : (
+                                    <span className="bg-orange-100 text-orange-700 px-2.5 py-1 rounded-lg text-xs font-bold"><Clock size={14} /></span>
+                                )}
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-3 text-sm">
+                                <div className="bg-gray-50 dark:bg-navy-900 p-3 rounded-xl">
+                                    <span className="text-xs text-gray-400 uppercase font-bold block mb-1">Servicio</span>
+                                    <span className="font-medium text-navy-700 dark:text-gray-300">{apt.meeting_type}</span>
+                                </div>
+                                <div className="bg-gray-50 dark:bg-navy-900 p-3 rounded-xl">
+                                    <span className="text-xs text-gray-400 uppercase font-bold block mb-1">Pago</span>
+                                    <span className="font-bold text-navy-900 dark:text-gold-500">${apt.total_price} <span className="text-[10px] font-normal text-gray-400">{apt.payments[0]?.method}</span></span>
+                                </div>
+                            </div>
+
+                            <div className="flex items-center justify-end gap-2 border-t border-gray-100 dark:border-navy-700 pt-3">
+                                {/* Duplicate actions for mobile */}
+                                {apt.status === 'pending' && (
+                                    <>
+                                        <button onClick={() => handleConfirmPayment(apt.id)} className="p-2.5 bg-green-50 text-green-600 rounded-xl font-bold text-xs flex items-center gap-1">
+                                            <CheckCircle size={16} /> Confirmar
+                                        </button>
+                                        <button onClick={() => handleRejectPayment(apt)} className="p-2.5 bg-red-50 text-red-600 rounded-xl">
+                                            <XCircle size={16} />
+                                        </button>
+                                    </>
+                                )}
+                                <a href={generateWhatsAppLink(apt.client_phone, apt.client_name, apt.date, apt.time)} target="_blank" className="p-2.5 bg-green-50 text-green-600 rounded-xl">
+                                    <MessageCircle size={16} />
+                                </a>
+                                <button onClick={() => handleViewInvoice(apt, apt.payments[0])} className="p-2.5 bg-gray-100 text-gray-600 rounded-xl">
+                                    <Eye size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Desktop Table View (Hidden on Mobile, Visible on Desktop) */}
+                <div className="hidden md:block overflow-x-auto">
                     <table className="w-full text-left">
                         <thead className="bg-gray-50 dark:bg-navy-900/50 text-gray-400 dark:text-gray-500 uppercase text-xs font-bold tracking-wider">
                             <tr>

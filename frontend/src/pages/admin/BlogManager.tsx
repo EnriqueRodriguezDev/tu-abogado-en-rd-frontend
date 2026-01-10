@@ -326,21 +326,75 @@ const BlogManager = () => {
         <div className="space-y-8 animate-in fade-in duration-500 font-sans">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
+                <div className="w-full md:w-auto">
                     <h2 className="text-3xl font-serif font-bold text-navy-900 dark:text-gold-500">Gestión de Blog</h2>
                     <p className="text-gray-500 dark:text-gray-400 mt-1">Crea, edita o elimina noticias y artículos legales.</p>
                 </div>
                 <button
                     onClick={() => setShowForm(true)}
-                    className="bg-navy-900 dark:bg-gold-500 text-white dark:text-navy-900 px-6 py-3 rounded-xl font-bold flex items-center gap-2 hover:opacity-90 transition-all shadow-lg"
+                    className="w-full md:w-auto bg-navy-900 dark:bg-gold-500 text-white dark:text-navy-900 px-6 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-all shadow-lg order-last md:order-none h-12 md:h-auto"
                 >
                     <Plus size={20} />
                     Crear Artículo
                 </button>
             </div>
 
-            {/* Posts Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Mobile Card List (Visible on Mobile) */}
+            <div className="md:hidden space-y-4">
+                {loading ? (
+                    <div className="flex justify-center py-12"><Loader2 className="animate-spin text-gold-500" size={32} /></div>
+                ) : posts.map((post) => (
+                    <div key={post.id} className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 overflow-hidden flex flex-col mb-4">
+                        {/* Image */}
+                        <div className="h-48 bg-gray-100 dark:bg-navy-900 relative">
+                            {post.image_url ? (
+                                <img src={post.image_url} alt={post.title} className="w-full h-full object-cover" />
+                            ) : (
+                                <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-navy-700">
+                                    <ImageIcon size={32} />
+                                </div>
+                            )}
+                            <div className="absolute top-3 left-3">
+                                <span className="px-3 py-1 bg-navy-900/80 backdrop-blur-md text-white text-xs font-bold rounded-full uppercase tracking-wide border border-white/10">
+                                    {post.category}
+                                </span>
+                            </div>
+                        </div>
+
+                        {/* Content */}
+                        <div className="p-5 flex flex-col gap-2">
+                            <div className="text-xs text-gray-400 flex items-center gap-1">
+                                <Calendar size={12} />
+                                {new Date(post.created_at).toLocaleDateString()}
+                            </div>
+                            <h3 className="text-lg font-bold text-navy-900 dark:text-white leading-tight">{post.title}</h3>
+                            <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2">
+                                {/* Strip HTML for summary */}
+                                {post.content.replace(/<[^>]*>?/gm, '').substring(0, 100)}...
+                            </p>
+                        </div>
+
+                        {/* Footer Actions */}
+                        <div className="px-5 pb-5 pt-0 flex gap-3">
+                            <button
+                                onClick={() => startEdit(post)}
+                                className="flex-1 bg-navy-50 dark:bg-navy-700 text-navy-900 dark:text-white border border-navy-100 dark:border-navy-600 py-3 rounded-xl font-bold flex items-center justify-center gap-2 hover:bg-navy-100 dark:hover:bg-navy-600 transition-colors"
+                            >
+                                <Edit size={18} /> Editar
+                            </button>
+                            <button
+                                onClick={() => handleDelete(post.id)}
+                                className="w-14 flex items-center justify-center bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/30 rounded-xl hover:bg-red-100 dark:hover:bg-red-900/30 transition-colors"
+                            >
+                                <Trash2 size={18} />
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            {/* Desktop Posts Grid (Hidden on Mobile) */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {loading ? (
                     <div className="col-span-full flex justify-center py-12">
                         <Loader2 className="animate-spin text-gold-500" size={32} />
@@ -348,7 +402,7 @@ const BlogManager = () => {
                 ) : posts.map((post) => (
                     <article key={post.id} className="bg-white dark:bg-navy-800 rounded-2xl shadow-sm border border-gray-100 dark:border-navy-700 hover:shadow-md transition-all overflow-hidden group flex flex-col h-full relative">
                         {/* Actions Overlay */}
-                        <div className="absolute top-3 right-3 z-20 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity flex gap-2">
+                        <div className="absolute top-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity flex gap-2">
                             <button onClick={() => startEdit(post)} className="p-2 bg-white/90 dark:bg-navy-900/90 text-navy-900 dark:text-gold-500 rounded-lg hover:scale-110 transition-transform shadow-sm backdrop-blur-sm">
                                 <Edit size={16} />
                             </button>
@@ -517,13 +571,15 @@ const BlogManager = () => {
                                                     Redactar con IA
                                                 </button>
                                             </label>
-                                            <ReactQuill
-                                                theme="snow"
-                                                value={content}
-                                                onChange={setContent}
-                                                modules={modules}
-                                                className="bg-white dark:bg-navy-800 text-navy-900 dark:text-white rounded-xl"
-                                            />
+                                            <div className="h-80 md:h-96 mb-12">
+                                                <ReactQuill
+                                                    theme="snow"
+                                                    value={content}
+                                                    onChange={setContent}
+                                                    modules={modules}
+                                                    className="h-full bg-white dark:bg-navy-800 text-navy-900 dark:text-white rounded-xl"
+                                                />
+                                            </div>
                                         </div>
                                     </>
                                 ) : (
@@ -563,13 +619,15 @@ const BlogManager = () => {
                                             <label className="text-sm font-bold text-navy-900 dark:text-gold-500 mb-2 flex items-center gap-2">
                                                 <FileText size={16} /> Content (EN)
                                             </label>
-                                            <ReactQuill
-                                                theme="snow"
-                                                value={contentEn}
-                                                onChange={setContentEn}
-                                                modules={modules}
-                                                className="bg-white dark:bg-navy-800 text-navy-900 dark:text-white rounded-xl"
-                                            />
+                                            <div className="h-80 md:h-96 mb-12 bg-white dark:bg-navy-800 text-navy-900 dark:text-white rounded-xl">
+                                                <ReactQuill
+                                                    theme="snow"
+                                                    value={contentEn}
+                                                    onChange={setContentEn}
+                                                    modules={modules}
+                                                    className="h-full"
+                                                />
+                                            </div>
                                         </div>
                                     </div>
                                 )}

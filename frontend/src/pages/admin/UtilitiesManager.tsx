@@ -218,7 +218,7 @@ const UtilitiesManager = () => {
                 {loading ? (
                     <div className="col-span-full flex justify-center py-12"><Loader2 className="animate-spin text-gold-500" /></div>
                 ) : utilities.map((item) => (
-                    <div key={item.id} className="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-sm border border-gray-100 dark:border-navy-700 hover:shadow-md transition-all flex flex-col h-full group">
+                    <div key={item.id} className="bg-white dark:bg-navy-800 rounded-2xl p-6 shadow-sm border-l-4 border-navy-900 dark:border-gold-500 hover:shadow-md transition-all flex flex-col h-full group">
                         <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-gray-100 dark:bg-navy-900">
                             {item.image_url ? (
                                 <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />
@@ -237,10 +237,39 @@ const UtilitiesManager = () => {
                             </div>
                         </div>
 
-                        <h4 className="text-xl font-bold text-navy-900 dark:text-white mb-2">{item.title}</h4>
-                        <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mb-4 flex-1">
-                            {item.description}
-                        </p>
+                        <div className="space-y-3 flex-1">
+                            <div>
+                                <h4 className="text-xl font-bold text-navy-900 dark:text-white leading-tight">{item.title}</h4>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm line-clamp-2 mt-1">
+                                    {item.description}
+                                </p>
+                            </div>
+
+                            {(item.title_en || item.description_en) && (
+                                <div className="pt-3 border-t border-gray-100 dark:border-navy-700">
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-gray-100 dark:bg-navy-700 text-gray-500 uppercase mb-1">
+                                        <Globe size={10} /> English
+                                    </span>
+                                    <h5 className="text-sm font-bold text-gray-700 dark:text-gray-300">{item.title_en || 'Untranslated Title'}</h5>
+                                    <p className="text-gray-400 dark:text-gray-500 text-xs line-clamp-2">
+                                        {item.description_en || 'No description translated.'}
+                                    </p>
+                                </div>
+                            )}
+                        </div>
+
+                        {item.link_url && (
+                            <div className="mt-4 pt-4 border-t border-gray-100 dark:border-navy-700 flex justify-end">
+                                <a
+                                    href={item.link_url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-xs font-bold text-navy-900 dark:text-gold-500 flex items-center gap-1 hover:underline"
+                                >
+                                    {item.link_text || 'Ver Enlace'} <Globe size={12} />
+                                </a>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -269,7 +298,7 @@ const UtilitiesManager = () => {
                     </>
                 }
             >
-                <div className="space-y-6">
+                <div className="space-y-8">
                     {/* Image Upload */}
                     <div className="border-2 border-dashed border-gray-200 dark:border-navy-700 rounded-2xl h-48 flex flex-col items-center justify-center text-gray-400 dark:text-navy-600 bg-gray-50 dark:bg-navy-800 hover:border-gold-500 transition-colors cursor-pointer relative group overflow-hidden">
                         {imagePreview ? (
@@ -293,96 +322,103 @@ const UtilitiesManager = () => {
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Spanish Column */}
+                    <div className="space-y-8">
+                        {/* Group 1: Información Principal (Español) */}
                         <div className="space-y-4">
                             <div className="flex items-center gap-2 text-navy-900 dark:text-gold-500 font-bold border-b border-gray-200 dark:border-navy-700 pb-2">
-                                <span className="text-lg">Español</span>
+                                <span className="text-lg">Información Principal (Español)</span>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-navy-900 dark:text-white">Título</label>
-                                <input
-                                    type="text"
-                                    value={title}
-                                    onChange={(e) => setTitle(e.target.value)}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none"
-                                    placeholder="Ej: Calculadora de Prestaciones"
-                                />
-                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-navy-900 dark:text-white">Título</label>
+                                    <input
+                                        type="text"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none font-medium"
+                                        placeholder="Ej: Calculadora de Prestaciones"
+                                    />
+                                </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-navy-900 dark:text-white">Descripción</label>
-                                <textarea
-                                    value={description}
-                                    onChange={(e) => setDescription(e.target.value)}
-                                    rows={4}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none resize-none"
-                                    placeholder="Descripción corta de la utilidad..."
-                                />
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-navy-900 dark:text-white">Descripción</label>
+                                    <textarea
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        rows={3}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none resize-none"
+                                        placeholder="Descripción corta de la utilidad..."
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        {/* English Column */}
-                        <div className="space-y-4">
+                        {/* Group 2: Traducción (English) */}
+                        <div className="space-y-4 bg-gray-50 dark:bg-navy-900/50 p-4 rounded-xl border border-gray-100 dark:border-navy-800">
                             <div className="flex items-center justify-between text-navy-900 dark:text-gold-500 font-bold border-b border-gray-200 dark:border-navy-700 pb-2">
-                                <span className="text-lg flex items-center gap-2"><Globe size={18} /> English</span>
+                                <span className="text-lg flex items-center gap-2"><Globe size={18} /> Traducción (English)</span>
                                 <button
                                     onClick={handleTranslate}
                                     disabled={translating}
-                                    className="text-xs bg-gold-500 text-navy-900 font-bold px-3 py-1 rounded-full flex items-center gap-1 hover:bg-gold-600 disabled:opacity-50 transition-colors"
+                                    className="text-xs bg-white dark:bg-navy-800 text-navy-900 border border-gray-200 dark:border-navy-700 font-bold px-3 py-1.5 rounded-full flex items-center gap-1 hover:bg-gray-100 disabled:opacity-50 transition-colors"
                                 >
                                     {translating ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                                     Traducir con IA
                                 </button>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-navy-900 dark:text-white">Title</label>
-                                <input
-                                    type="text"
-                                    value={titleEn}
-                                    onChange={(e) => setTitleEn(e.target.value)}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none"
-                                    placeholder="e.g. Benefits Calculator"
-                                />
+                            <div className="grid grid-cols-1 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-navy-900 dark:text-white">Title (EN)</label>
+                                    <input
+                                        type="text"
+                                        value={titleEn}
+                                        onChange={(e) => setTitleEn(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none"
+                                        placeholder="e.g. Benefits Calculator"
+                                    />
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium text-navy-900 dark:text-white">Description (EN)</label>
+                                    <textarea
+                                        value={descriptionEn}
+                                        onChange={(e) => setDescriptionEn(e.target.value)}
+                                        rows={3}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none resize-none"
+                                        placeholder="Short description in English..."
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Group 3: Configuración (Enlaces) */}
+                        <div className="space-y-4">
+                            <div className="flex items-center gap-2 text-navy-900 dark:text-gold-500 font-bold border-b border-gray-200 dark:border-navy-700 pb-2">
+                                <span className="text-lg">Configuración del Enlace</span>
                             </div>
 
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium text-navy-900 dark:text-white">Description</label>
-                                <textarea
-                                    value={descriptionEn}
-                                    onChange={(e) => setDescriptionEn(e.target.value)}
-                                    rows={4}
-                                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none resize-none"
-                                    placeholder="Short description in English..."
-                                />
-                            </div>
-
-                            {/* External Links Section */}
-                            <div className="pt-4 border-t border-gray-200 dark:border-navy-700">
-                                <h4 className="font-bold text-navy-900 dark:text-gold-500 mb-3">Enlace Externo (Opcional)</h4>
-                                <div className="space-y-3">
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">URL de la Herramienta</label>
-                                        <input
-                                            type="text"
-                                            value={linkUrl}
-                                            onChange={(e) => setLinkUrl(e.target.value)}
-                                            className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none text-sm"
-                                            placeholder="https://..."
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="text-xs font-medium text-gray-500 dark:text-gray-400">Texto del Botón</label>
-                                        <input
-                                            type="text"
-                                            value={linkText}
-                                            onChange={(e) => setLinkText(e.target.value)}
-                                            className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none text-sm"
-                                            placeholder="Ej: Ir a la Calculadora"
-                                        />
-                                    </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-500 dark:text-gray-400">URL Destino</label>
+                                    <input
+                                        type="text"
+                                        value={linkUrl}
+                                        onChange={(e) => setLinkUrl(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none text-sm font-mono"
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-sm font-bold text-gray-500 dark:text-gray-400">Texto del Botón</label>
+                                    <input
+                                        type="text"
+                                        value={linkText}
+                                        onChange={(e) => setLinkText(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-navy-700 bg-white dark:bg-navy-800 text-navy-900 dark:text-white focus:ring-2 focus:ring-gold-500 outline-none text-sm"
+                                        placeholder="Ej: Ir a la Calculadora"
+                                    />
                                 </div>
                             </div>
                         </div>

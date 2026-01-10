@@ -1,4 +1,4 @@
-import { Shield, Award, Lightbulb, Users } from 'lucide-react';
+import { Shield, Award, Lightbulb } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 

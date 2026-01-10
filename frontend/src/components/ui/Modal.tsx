@@ -22,9 +22,9 @@ export const BaseModal = ({ isOpen, onClose, title, children, footer, maxWidth =
             />
 
             {/* Content */}
-            <div className={`relative bg-white dark:bg-navy-800 rounded-2xl shadow-xl w-full ${maxWidth} overflow-hidden transform transition-all animate-in zoom-in-95 duration-200 border border-gray-100 dark:border-navy-700`}>
+            <div className={`relative bg-white dark:bg-navy-800 rounded-2xl shadow-xl w-[95%] md:w-full ${maxWidth} max-h-[90vh] flex flex-col transform transition-all animate-in zoom-in-95 duration-200 border border-gray-100 dark:border-navy-700`}>
                 {/* Header */}
-                <div className="px-6 py-4 bg-navy-900 flex justify-between items-center">
+                <div className="px-6 py-4 bg-navy-900 flex justify-between items-center shrink-0">
                     <h3 className="text-lg font-serif font-bold text-gold-500">{title}</h3>
                     <button onClick={onClose} className="text-gray-400 hover:text-white transition-colors">
                         <X size={20} />
@@ -32,13 +32,13 @@ export const BaseModal = ({ isOpen, onClose, title, children, footer, maxWidth =
                 </div>
 
                 {/* Body */}
-                <div className="p-6">
+                <div className="p-6 overflow-y-auto">
                     {children}
                 </div>
 
                 {/* Footer */}
                 {footer && (
-                    <div className="px-6 py-4 bg-gray-50 dark:bg-navy-900/50 border-t border-gray-100 dark:border-navy-700 flex justify-end gap-3">
+                    <div className="px-6 py-4 bg-gray-50 dark:bg-navy-900/50 border-t border-gray-100 dark:border-navy-700 flex justify-end gap-3 shrink-0">
                         {footer}
                     </div>
                 )}

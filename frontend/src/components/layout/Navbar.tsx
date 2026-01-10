@@ -53,7 +53,7 @@ const Navbar = () => {
                                 key={item.name}
                                 to={item.href}
                                 className={`${isActive(item.href) ? 'text-gold-500' : 'text-gray-300 hover:text-white'
-                                    } px-3 py-2 text-base font-medium transition-colors duration-200`}
+                                    } px-4 py-3 text-lg md:text-base font-medium transition-colors duration-200`}
                             >
                                 {t(`nav.${item.key}`)}
                             </Link>
