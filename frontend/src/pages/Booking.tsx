@@ -115,6 +115,9 @@ const Booking = () => {
         }
     }, [currentStep]);
 
+    // Scroll to top on booking success (Fix for mobile view)
+
+
     // Fetch availability when date is selected
     useEffect(() => {
         if (selectedDate && selectedVariant && selectedVariant.duration_minutes > 0) {
@@ -140,6 +143,13 @@ const Booking = () => {
     const [apiError, setApiError] = useState<string | null>(null);
 
     const totalPrice = selectedVariant ? selectedVariant.price_usd : 0;
+
+    // Scroll to top on booking success (Fix for mobile view)
+    useEffect(() => {
+        if (bookingComplete) {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    }, [bookingComplete]);
 
     // --- PHONE MASKING (RD) ---
     const formatPhoneNumber = (value: string) => {
