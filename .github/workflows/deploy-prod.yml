@@ -1,0 +1,39 @@
+name: Production Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy-prod:
+    name: Deploy to Production
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Deploy Prod Environment
+        env:
+          CONTAINER_NAME: tu-abogado-frontend-prod
+          HOST_PORT: 3000
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_KEY_PROD }}
+          VITE_RESEND_LINK: ${{ secrets.RESEND_LINK_PROD }}
+          VITE_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY_PROD }}
+        run: |
+          echo "🚀 Starting PROD Deployment on Port $HOST_PORT..."
+          
+          echo "⬇️  Stopping Prod container..."
+          sudo -E docker-compose -p tu_abogado_prod down --remove-orphans || true
+          
+          echo "🏗️  Building and Starting Prod..."
+          sudo -E docker-compose -p tu_abogado_prod up -d --build
+          
+          echo "🧹 Pruning..."
+          docker image prune -f
+
+          echo "✅ Deployment Production Complete!"

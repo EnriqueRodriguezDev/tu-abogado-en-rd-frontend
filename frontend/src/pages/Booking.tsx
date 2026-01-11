@@ -176,20 +176,32 @@ const Booking = () => {
 
     // --- VALIDATION & NAVIGATION ---
     // --- VALIDATION & NAVIGATION ---
+    // --- SANITIZATION HELPER ---
+    const sanitizeInput = (str: string) => {
+        return str.replace(/[<>]/g, ''); // Basic XSS protection: strip < and >
+    };
+
+    // --- VALIDATION & NAVIGATION ---
     const validateStep3 = () => {
         const newErrors: { [key: string]: string } = {};
 
         // Name: Letters/Accents only, 3-30 chars, no double spaces
+        // Regex: Starts with letters, allows single spaces between words, no trailing/leading spaces allowed by regex but we trim before check
         const nameRegex = /^[a-zA-ZáéíóúñÁÉÍÓÚÑ]+(?:\s[a-zA-ZáéíóúñÁÉÍÓÚÑ]+)*$/;
-        if (!clientData.name.trim()) newErrors.name = 'El nombre es requerido';
-        else if (clientData.name.length < 3 || clientData.name.length > 30) newErrors.name = 'El nombre debe tener entre 3 y 30 caracteres';
-        else if (!nameRegex.test(clientData.name)) newErrors.name = 'Solo letras y espacios simples permitidos';
+        const trimmedName = clientData.name.trim();
 
-        // Email: Strict Regex
+        if (!trimmedName) newErrors.name = 'El nombre es requerido';
+        else if (trimmedName.length < 3 || trimmedName.length > 30) newErrors.name = 'El nombre debe tener entre 3 y 30 caracteres';
+        else if (!nameRegex.test(trimmedName)) newErrors.name = 'Solo letras y espacios simples permitidos (sin espacios dobles)';
+
+        // Email: Strict Regex - NO SPACES
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
-        if (!clientData.email.trim()) newErrors.email = 'El email es requerido';
-        else if (clientData.email.length > 50) newErrors.email = 'El email es muy largo';
-        else if (!emailRegex.test(clientData.email)) newErrors.email = 'Email inválido';
+        const trimmedEmail = clientData.email.trim();
+
+        if (!trimmedEmail) newErrors.email = 'El email es requerido';
+        else if (/\s/.test(trimmedEmail)) newErrors.email = 'El email no puede contener espacios';
+        else if (trimmedEmail.length > 50) newErrors.email = 'El email es muy largo';
+        else if (!emailRegex.test(trimmedEmail)) newErrors.email = 'Email inválido';
 
         // Strict Phone Validation
         const phoneDigits = clientData.phone.replace(/\D/g, '');
@@ -202,11 +214,23 @@ const Booking = () => {
             }
         }
 
-        // Reason: Alphanumeric, max 500
-        // Allows letters, numbers, punctuation, spaces
-        if (!clientData.reason.trim()) newErrors.reason = 'El motivo es requerido';
-        else if (clientData.reason.length > 500) newErrors.reason = 'Máximo 500 caracteres';
-        else if (/\s{2,}/.test(clientData.reason)) newErrors.reason = 'No se permiten espacios dobles';
+        // RNC Validation (if present)
+        if (clientData.rnc && clientData.rnc.trim()) {
+            if (!/^\d+$/.test(clientData.rnc)) newErrors.rnc = "Solo números permitidos";
+            else if (clientData.rnc.length > 11) newErrors.rnc = "Máximo 11 dígitos";
+        }
+
+        // Reason: Alphanumeric + Spaces, NO SYMBOLS, min 30 chars
+        // Allowed: Letters, Numbers, Spaces, Basic punctuation (. ,) might be needed for a reason description?
+        // User requested: "Alphanumeric Only (Letters, Numbers, Spaces). NO SYMBOLS allowed (no < > / ; @ etc.)"
+        // Let's interpret strict alphanumeric + spaces as requested initially.
+        const reasonRegex = /^[a-zA-Z0-9áéíóúñÁÉÍÓÚÑ\s]+$/;
+        const trimmedReason = clientData.reason.trim();
+
+        if (!trimmedReason) newErrors.reason = 'El motivo es requerido';
+        else if (trimmedReason.length < 30) newErrors.reason = 'Mínimo 30 caracteres para entender su caso';
+        else if (trimmedReason.length > 500) newErrors.reason = 'Máximo 500 caracteres';
+        else if (!reasonRegex.test(trimmedReason)) newErrors.reason = 'No se permiten símbolos especiales (solo letras, números y espacios)';
 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
@@ -704,12 +728,35 @@ const Booking = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Nombre Completo <span className="text-red-500">*</span></label>
-                    <input type="text" value={clientData.name} onChange={e => { setClientData({ ...clientData, name: e.target.value }); if (errors.name) setErrors({ ...errors, name: '' }); }} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} placeholder="Tu Nombre" />
+                    <input
+                        type="text"
+                        value={clientData.name}
+                        onChange={e => {
+                            // Prevent double spaces while typing
+                            const val = e.target.value.replace(/\s{2,}/g, ' ');
+                            setClientData({ ...clientData, name: val });
+                            if (errors.name) setErrors({ ...errors, name: '' });
+                        }}
+                        onBlur={() => setClientData(prev => ({ ...prev, name: prev.name.trim() }))}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        placeholder="Tu Nombre"
+                    />
                     {errors.name && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.name}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Correo Electrónico <span className="text-red-500">*</span></label>
-                    <input type="email" value={clientData.email} onChange={e => { setClientData({ ...clientData, email: e.target.value }); if (errors.email) setErrors({ ...errors, email: '' }); }} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} placeholder="usuario@email.com" />
+                    <input
+                        type="email"
+                        value={clientData.email}
+                        onChange={e => {
+                            // Prevent spaces
+                            const val = e.target.value.replace(/\s/g, '');
+                            setClientData({ ...clientData, email: val });
+                            if (errors.email) setErrors({ ...errors, email: '' });
+                        }}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        placeholder="usuario@email.com"
+                    />
                     {errors.email && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.email}</p>}
                 </div>
                 <div>
@@ -719,11 +766,34 @@ const Booking = () => {
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">RNC / Cédula <span className="text-gray-400 font-normal">(Opcional)</span></label>
-                    <input type="text" value={clientData.rnc} onChange={e => setClientData({ ...clientData, rnc: e.target.value })} className="w-full bg-gray-50 border border-transparent rounded-xl px-4 py-3 outline-none focus:border-gold-500 focus:bg-white transition-all" placeholder="Para factura con valor fiscal" />
+                    <input
+                        type="text"
+                        value={clientData.rnc}
+                        onChange={e => {
+                            // Numeric only
+                            const val = e.target.value.replace(/\D/g, '');
+                            if (val.length <= 11) {
+                                setClientData({ ...clientData, rnc: val });
+                            }
+                        }}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.rnc ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        placeholder="Para factura con valor fiscal"
+                    />
+                    {errors.rnc && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.rnc}</p>}
                 </div>
                 <div className="col-span-full">
                     <label className="block text-sm font-bold text-gray-700 mb-2">Motivo de la consulta <span className="text-red-500">*</span></label>
-                    <textarea value={clientData.reason} onChange={e => { setClientData({ ...clientData, reason: e.target.value }); if (errors.reason) setErrors({ ...errors, reason: '' }); }} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.reason ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} rows={3} placeholder="Describa brevemente su caso..." />
+                    <textarea
+                        value={clientData.reason}
+                        onChange={e => {
+                            const sanitized = sanitizeInput(e.target.value);
+                            setClientData({ ...clientData, reason: sanitized });
+                            if (errors.reason) setErrors({ ...errors, reason: '' });
+                        }}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.reason ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        rows={3}
+                        placeholder="Describa brevemente su caso..."
+                    />
                     {errors.reason && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.reason}</p>}
                 </div>
             </div>

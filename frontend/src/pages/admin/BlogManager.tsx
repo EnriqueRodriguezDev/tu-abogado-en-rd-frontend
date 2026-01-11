@@ -503,10 +503,19 @@ const BlogManager = () => {
                                                     type="button"
                                                     onClick={handleAIImage}
                                                     disabled={!!aiLoading}
-                                                    className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                                    className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait"
                                                 >
-                                                    {aiLoading === 'generate-image-prompt' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                                    Generar con IA
+                                                    {aiLoading === 'generate-image-prompt' ? (
+                                                        <>
+                                                            <Loader2 size={12} className="animate-spin" />
+                                                            Creando...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Sparkles size={12} />
+                                                            Generar con IA
+                                                        </>
+                                                    )}
                                                 </button>
                                             </label>
 
@@ -565,10 +574,19 @@ const BlogManager = () => {
                                                     type="button"
                                                     onClick={handleAIContent}
                                                     disabled={!!aiLoading}
-                                                    className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                                    className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait"
                                                 >
-                                                    {aiLoading === 'generate-blog-content' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                                    Redactar con IA
+                                                    {aiLoading === 'generate-blog-content' ? (
+                                                        <>
+                                                            <Loader2 size={12} className="animate-spin" />
+                                                            Generando...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Sparkles size={12} />
+                                                            Redactar con IA
+                                                        </>
+                                                    )}
                                                 </button>
                                             </label>
                                             <div className="h-80 md:h-96 mb-12">
@@ -600,10 +618,19 @@ const BlogManager = () => {
                                                     type="button"
                                                     onClick={() => handleTranslate('en')}
                                                     disabled={translating}
-                                                    className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                                    className="text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait"
                                                 >
-                                                    {translating ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
-                                                    Traducir Ahora
+                                                    {translating ? (
+                                                        <>
+                                                            <Loader2 size={12} className="animate-spin" />
+                                                            Traduciendo...
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <Sparkles size={12} />
+                                                            Traducir Ahora
+                                                        </>
+                                                    )}
                                                 </button>
                                             </label>
                                             <input

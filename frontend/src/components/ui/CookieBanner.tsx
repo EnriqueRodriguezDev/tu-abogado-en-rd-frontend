@@ -7,7 +7,7 @@ export const CookieBanner = () => {
     const [isVisible, setIsVisible] = useState(false);
     const { i18n } = useTranslation();
     const navigate = useNavigate();
-    const lang: 'es' | 'en' = i18n.language?.startsWith('en') ? 'en' : 'es';
+    const lang: 'es' | 'en' = i18n.language?.startsWith('es') ? 'en' : 'es';
 
     useEffect(() => {
         const consent = localStorage.getItem('cookieConsent');

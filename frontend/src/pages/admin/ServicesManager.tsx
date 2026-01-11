@@ -620,10 +620,19 @@ const ServicesManager = () => {
                                                         type="button"
                                                         onClick={activeTab === 'es' ? handleAIText : () => handleTranslate('en')}
                                                         disabled={!!aiLoading || translating}
-                                                        className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50"
+                                                        className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 dark:text-gold-500 dark:bg-navy-700 dark:hover:bg-navy-600 rounded-lg px-3 py-1.5 flex items-center gap-2 transition-all disabled:opacity-50 disabled:cursor-wait"
                                                     >
-                                                        <Sparkles size={12} />
-                                                        {activeTab === 'es' ? 'Mejorar Texto' : 'Traducir con IA'}
+                                                        {(aiLoading === 'generate-service-description' || translating) ? (
+                                                            <>
+                                                                <Loader2 size={12} className="animate-spin" />
+                                                                {translating ? 'Traduciendo...' : 'Generando...'}
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Sparkles size={12} />
+                                                                {activeTab === 'es' ? 'Mejorar Texto' : 'Traducir con IA'}
+                                                            </>
+                                                        )}
                                                     </button>
                                                 </label>
                                                 <textarea
@@ -686,8 +695,9 @@ const ServicesManager = () => {
                                                     type="button"
                                                     onClick={handleAIIcon}
                                                     disabled={!!aiLoading}
-                                                    className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 rounded-lg px-2 py-1 transition-all"
+                                                    className="text-xs font-bold text-navy-900 bg-gold-500/20 hover:bg-gold-500/40 rounded-lg px-2 py-1 transition-all flex items-center gap-1 disabled:opacity-50 disabled:cursor-wait"
                                                 >
+                                                    {aiLoading === 'pick-icon' ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
                                                     Sugerir
                                                 </button>
                                             </label>

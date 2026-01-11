@@ -1,10 +1,8 @@
-version: '3.8'
-
 services:
   frontend:
-    container_name: tu-abogado-frontend
+    container_name: ${CONTAINER_NAME}
     build:
-      context: ./frontend
+      context: .
       dockerfile: Dockerfile
       args:
         VITE_SUPABASE_URL: ${VITE_SUPABASE_URL}
@@ -12,7 +10,5 @@ services:
         VITE_RESEND_LINK: ${VITE_RESEND_LINK}
         VITE_RESEND_API_KEY: ${VITE_RESEND_API_KEY}
     ports:
-      - "80:80"
-    restart: always
-    env_file:
-      - .env
+      - "${HOST_PORT}:80"
+    restart: unless-stopped
