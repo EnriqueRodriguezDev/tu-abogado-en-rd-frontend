@@ -26,17 +26,19 @@ jobs:
           VITE_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY_DEV }}
           
         run: |
-          echo "📂 Debugging: Listando archivos en el directorio actual:"
+          echo "📂 Entrando a la carpeta frontend..."
+          cd frontend
+          
+          echo "📂 Debugging: Verificando archivos en frontend:"
           ls -la
           
           echo "🚀 Starting DEV Deployment on Port $HOST_PORT..."
           
           echo "⬇️  Stopping Dev container..."
-          # Agregamos -f docker-compose.yml explícitamente
+          # Usamos -p tu_abogado_dev
           sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev down --remove-orphans || true
           
           echo "🏗️  Building and Starting Dev..."
-          # Agregamos -f docker-compose.yml explícitamente
           sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev up -d --build
           
           echo "🧹 Pruning unused images..."

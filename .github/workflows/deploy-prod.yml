@@ -20,25 +20,29 @@ jobs:
         env:
           CONTAINER_NAME: tu-abogado-frontend-prod
           HOST_PORT: 3000
+          # Asegúrate que estos secrets existen en GitHub
           VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL_PROD }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_KEY_PROD }}
           VITE_RESEND_LINK: ${{ secrets.RESEND_LINK_PROD }}
           VITE_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY_PROD }}
         run: |
-          echo "📂 Debugging: Listando archivos en el directorio actual:"
+          echo "📂 Entrando a la carpeta frontend..."
+          cd frontend
+
+          echo "📂 Debugging: Verificando archivos en frontend:"
           ls -la
           
-          echo "🚀 Starting DEV Deployment on Port $HOST_PORT..."
+          echo "🚀 Starting PROD Deployment on Port $HOST_PORT..."
           
-          echo "⬇️  Stopping Dev container..."
-          # Agregamos -f docker-compose.yml explícitamente
-          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev down --remove-orphans || true
+          echo "⬇️  Stopping Prod container..."
+          # OJO: Aquí corregí el nombre del proyecto a tu_abogado_prod
+          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_prod down --remove-orphans || true
           
-          echo "🏗️  Building and Starting Dev..."
-          # Agregamos -f docker-compose.yml explícitamente
-          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev up -d --build
+          echo "🏗️  Building and Starting Prod..."
+          # OJO: Aquí también corregí a tu_abogado_prod
+          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_prod up -d --build
           
           echo "🧹 Pruning unused images..."
           docker image prune -f
 
-          echo "✅ Deployment Development Complete!"
+          echo "✅ Deployment Production Complete!"
