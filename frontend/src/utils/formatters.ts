@@ -98,7 +98,12 @@ export const generateWhatsAppLink = (
     timeStr: string,
 ): string => {
     if (!phone) return '#';
-    const cleanPhone = phone.replace(/\D/g, ''); // Remove non-numeric chars
+    let cleanPhone = phone.replace(/\D/g, ''); // Remove non-numeric chars
+
+    // Auto-fix for Dominican/US numbers: Prepend '1' if 10 digits
+    if (cleanPhone.length === 10) {
+        cleanPhone = '1' + cleanPhone;
+    }
 
     // Formatting date/time for the message
     const formattedDate = formatDate(dateStr, true);
