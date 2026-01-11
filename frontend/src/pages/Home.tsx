@@ -83,19 +83,19 @@ const Home = () => {
                         {/* Step 1 */}
                         <div className="flex flex-col items-center relative z-10 group">
                             <div className="w-12 h-12 bg-navy-900 text-white rounded-full flex items-center justify-center font-bold text-xl mb-6 shadow-xl group-hover:scale-110 transition-transform duration-300">1</div>
-                            <h3 className="text-xl font-bold text-navy-900">Agenda tu consulta</h3>
+                            <h3 className="text-xl font-bold text-[#0a192f]">Agenda tu consulta</h3>
                         </div>
 
                         {/* Step 2 */}
                         <div className="flex flex-col items-center relative z-10 group">
                             <div className="w-12 h-12 bg-navy-900 text-white rounded-full flex items-center justify-center font-bold text-xl mb-6 shadow-xl group-hover:scale-110 transition-transform duration-300">2</div>
-                            <h3 className="text-xl font-bold text-navy-900">Habla con un abogado</h3>
+                            <h3 className="text-xl font-bold text-[#0a192f]">Habla con un abogado</h3>
                         </div>
 
                         {/* Step 3 */}
                         <div className="flex flex-col items-center relative z-10 group">
                             <div className="w-12 h-12 bg-navy-900 text-white rounded-full flex items-center justify-center font-bold text-xl mb-6 shadow-xl group-hover:scale-110 transition-transform duration-300">3</div>
-                            <h3 className="text-xl font-bold text-navy-900">Recibe orientación clara</h3>
+                            <h3 className="text-xl font-bold text-[#0a192f]">Recibe orientación clara</h3>
                         </div>
                     </div>
                 </div>

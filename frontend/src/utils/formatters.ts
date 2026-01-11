@@ -27,7 +27,7 @@ export const formatDate = (dateInput: string | Date, longFormat: boolean = false
     // CAMBIO AQUÍ: Usamos 'numeric' en lugar de '2-digit'
     // 'numeric' -> 1/1/2026
     // '2-digit' -> 01/01/2026
-    const options: Intl.DateTimeFormatOptions = longFormat 
+    const options: Intl.DateTimeFormatOptions = longFormat
         ? { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' }
         : { day: 'numeric', month: 'numeric', year: 'numeric' };
 
@@ -96,15 +96,14 @@ export const generateWhatsAppLink = (
     clientName: string,
     dateStr: string,
     timeStr: string,
-    companyName: string = "Tu Abogado en RD"
 ): string => {
-    const cleanPhone = phone.replace(/\D/g, '');
+    if (!phone) return '#';
+    const cleanPhone = phone.replace(/\D/g, ''); // Remove non-numeric chars
 
-    // Usamos la nueva función para asegurar que el día sea correcto en el mensaje también
-    const formattedDate = formatDate(dateStr, true); // true para formato largo
+    // Formatting date/time for the message
+    const formattedDate = formatDate(dateStr, true);
     const formattedTime = formatTime12Hour(timeStr);
 
-    const message = `Saludos ${clientName}, le escribimos de ${companyName} con relación a su cita agendada para el ${formattedDate} a las ${formattedTime}. ¿Tiene alguna consulta previa?`;
-
+    const message = `Hola ${clientName}, le escribo de TuAbogadoEnRD sobre su cita del ${formattedDate} a las ${formattedTime}.`;
     return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
 };

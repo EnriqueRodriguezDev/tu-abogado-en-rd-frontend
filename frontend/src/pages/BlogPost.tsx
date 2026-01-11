@@ -50,7 +50,7 @@ const BlogPost = () => {
 
         switch (platform) {
             case 'whatsapp':
-                window.open(`https://wa.me/?text=${encodeURIComponent(title + ' - ' + url)}`, '_blank');
+                window.open(`https://wa.me/?text=${encodeURIComponent(title + '\n\n' + url)}`, '_blank');
                 break;
             case 'facebook':
                 window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');

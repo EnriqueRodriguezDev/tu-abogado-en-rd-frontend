@@ -744,7 +744,7 @@ const Booking = () => {
                             if (errors.name) setErrors({ ...errors, name: '' });
                         }}
                         onBlur={() => setClientData(prev => ({ ...prev, name: prev.name.trim() }))}
-                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-gray-900 ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         placeholder="TU NOMBRE"
                     />
                     {errors.name && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.name}</p>}
@@ -773,14 +773,14 @@ const Booking = () => {
                             // Limpiar error si existe
                             if (errors.email) setErrors({ ...errors, email: '' });
                         }}
-                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-gray-900 ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         placeholder="usuario@email.com"
                     />
                     {errors.email && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.email}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Teléfono (RD) <span className="text-red-500">*</span></label>
-                    <input type="tel" value={clientData.phone} onChange={handlePhoneChange} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.phone ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} placeholder="(8XX) XXX-XXXX" />
+                    <input type="tel" value={clientData.phone} onChange={handlePhoneChange} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-gray-900 ${errors.phone ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} placeholder="(8XX) XXX-XXXX" />
                     {errors.phone && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.phone}</p>}
                 </div>
                 <div>
@@ -795,7 +795,7 @@ const Booking = () => {
                                 setClientData({ ...clientData, rnc: val });
                             }
                         }}
-                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.rnc ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 text-black border rounded-xl px-4 py-3 outline-none transition-all ${errors.rnc ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         placeholder="Para factura con valor fiscal"
                     />
                     {errors.rnc && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.rnc}</p>}
