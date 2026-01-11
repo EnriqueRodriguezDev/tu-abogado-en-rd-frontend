@@ -754,7 +754,7 @@ const Booking = () => {
                             if (errors.name) setErrors({ ...errors, name: '' });
                         }}
                         onBlur={() => setClientData(prev => ({ ...prev, name: prev.name.trim() }))}
-                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-gray-900 ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-navy-900 ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         placeholder="TU NOMBRE"
                     />
                     {errors.name && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.name}</p>}
@@ -783,14 +783,14 @@ const Booking = () => {
                             // Limpiar error si existe
                             if (errors.email) setErrors({ ...errors, email: '' });
                         }}
-                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-gray-900 ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-navy-900 ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         placeholder="usuario@email.com"
                     />
                     {errors.email && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.email}</p>}
                 </div>
                 <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Teléfono (RD) <span className="text-red-500">*</span></label>
-                    <input type="tel" value={clientData.phone} onChange={handlePhoneChange} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-gray-900 ${errors.phone ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} placeholder="(8XX) XXX-XXXX" />
+                    <input type="tel" value={clientData.phone} onChange={handlePhoneChange} className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-navy-900 ${errors.phone ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`} placeholder="(8XX) XXX-XXXX" />
                     {errors.phone && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.phone}</p>}
                 </div>
                 <div>
@@ -805,7 +805,7 @@ const Booking = () => {
                                 setClientData({ ...clientData, rnc: val });
                             }
                         }}
-                        className={`w-full bg-gray-50 text-black border rounded-xl px-4 py-3 outline-none transition-all ${errors.rnc ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 text-navy-900 border rounded-xl px-4 py-3 outline-none transition-all ${errors.rnc ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         placeholder="Para factura con valor fiscal"
                     />
                     {errors.rnc && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.rnc}</p>}
@@ -819,13 +819,14 @@ const Booking = () => {
                             let val = e.target.value.toUpperCase();
 
                             // 2. Strict whitelist: Alphanumeric + Spaces (No symbols like < > / @ etc)
-                            // Allowed: A-Z, 0-9, ÁÉÍÓÚÑ, Space
-                            val = val.replace(/[^A-Z0-9ÁÉÍÓÚÑ\s]/g, '');
+                            // Allowed: A-Z, 0-9, ÁÉÍÓÚÑ, Space, . and ,
+                            val = val.replace(/[^A-Z0-9ÁÉÍÓÚÑ\s,.]/g, '')
+                                .replace(/\s{2,}/g, ' ');;
 
                             setClientData({ ...clientData, reason: val });
                             if (errors.reason) setErrors({ ...errors, reason: '' });
                         }}
-                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.reason ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
+                        className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all text-navy-900 ${errors.reason ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         rows={3}
                         placeholder="DESCRIBA BREVEMENTE SU CASO..."
                     />
@@ -1040,7 +1041,7 @@ const Booking = () => {
                             </div>
                             <div className="mt-12 pt-6 border-t border-gray-100 flex justify-between">
                                 <button onClick={handleBack} disabled={currentStep === 1} className={`px-6 py-2 rounded-lg font-bold flex items-center gap-2 ${currentStep === 1 ? 'opacity-0' : 'text-gray-500 hover:bg-gray-100'}`}><ChevronLeft size={18} /> Atrás</button>
-                                {currentStep < 4 && <button onClick={handleNext} className="bg-navy-900 text-white px-8 py-3 rounded-xl font-bold hover:bg-navy-800 flex items-center gap-2 shadow-lg">Siguiente <ArrowRight size={18} /></button>}
+                                {currentStep < 4 && <button onClick={handleNext} className="bg-gold-500 text-navy-900 px-8 py-3 rounded-xl font-bold hover:bg-gold-600 flex items-center gap-2 shadow-lg transition-colors">Siguiente <ArrowRight size={18} /></button>}
                             </div>
                         </div>
                     </div>

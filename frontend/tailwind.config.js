@@ -8,15 +8,20 @@ export default {
         extend: {
             colors: {
                 navy: {
-                    900: '#0a192f', // Deepest Navy
-                    800: '#112240',
-                    700: '#233554',
-                    50: '#f0f4f8',
+                    50: '#E2EAF5',   // Darkened from #F0F5FA
+                    100: '#D0DBE8',  // Darkened from #eaf0f7
+                    500: '#5A6178',  // Darkened from #71788f (Muted blue)
+                    700: '#10184A',  // Darkened from #17236a (Vibrant)
+                    800: '#0A123B',  // Darkened from #0f1c52 (Strong)
+                    900: '#040A26',  // Darkened from #0a173b (Deepest Elegant)
                 },
                 gold: {
-                    400: '#d4af37',
-                    500: '#c5a059', // Primary Gold
-                    600: '#b08d55',
+                    50: '#FBF9E6',   // Very light cream (Backgrounds)
+                    100: '#F7EFC2',
+                    300: '#E6C860',
+                    400: '#D4AF37',  // The Standard "True Gold" Hex
+                    500: '#C5A028',  // Primary Button (Balanced Yellow-Gold)
+                    600: '#A38318',  // Hover State (Darker Gold, not Orange)
                 },
             },
             fontFamily: {

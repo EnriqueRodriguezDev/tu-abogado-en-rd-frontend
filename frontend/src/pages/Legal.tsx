@@ -92,7 +92,7 @@ const Legal = () => {
                                 <span className="text-gold-500 font-bold tracking-widest text-xs uppercase mb-2 block">
                                     {lang === 'en' ? 'Leagl Document' : 'Documento Legal'}
                                 </span>
-                                <h2 className="text-3xl font-serif font-bold text-[#0a192f]">
+                                <h2 className="text-3xl font-serif font-bold text-navy-900">
                                     {content.title}
                                 </h2>
                             </div>
