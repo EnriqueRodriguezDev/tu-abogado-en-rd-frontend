@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { useParams, Link, Navigate, useLocation } from 'react-router-dom';
 import { LEGAL_CONTENT } from '../data/legalText';
 import { useTranslation } from 'react-i18next';
@@ -12,8 +13,13 @@ const Legal = () => {
     // Default to 'terms' if no section provided
     const activeSection = section || 'terms';
 
-    // Determine language (default to 'es' if not 'en')
-    const lang = i18n.language.startsWith('es') ? 'en' : 'es';
+    // Scroll to top on mount or section change
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [activeSection]);
+
+    // Determine language (Fix: strictly check if English, otherwise Spanish)
+    const lang = (i18n.language || 'es').startsWith('en') ? 'en' : 'es';
 
     // Validate section matches available keys
     const validSections = ['terms', 'privacy', 'refunds'];
