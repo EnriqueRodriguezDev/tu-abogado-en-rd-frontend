@@ -114,9 +114,10 @@ i18n
     .use(initReactI18next)
     .init({
         resources,
+        lng: 'es', // Force start in Spanish if not detected otherwise
         fallbackLng: 'es',
         detection: {
-            order: ['localStorage', 'navigator'],
+            order: ['localStorage'], // Remove navigator to avoid browser lang overriding
             caches: ['localStorage'],
             lookupLocalStorage: 'i18nextLng'
         },

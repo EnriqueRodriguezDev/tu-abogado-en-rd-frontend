@@ -176,11 +176,6 @@ const Booking = () => {
 
     // --- VALIDATION & NAVIGATION ---
     // --- VALIDATION & NAVIGATION ---
-    // --- SANITIZATION HELPER ---
-    const sanitizeInput = (str: string) => {
-        return str.replace(/[<>]/g, ''); // Basic XSS protection: strip < and >
-    };
-
     // --- VALIDATION & NAVIGATION ---
     const validateStep3 = () => {
         const newErrors: { [key: string]: string } = {};
@@ -301,7 +296,11 @@ const Booking = () => {
     const [busyRanges, setBusyRanges] = useState<{ start: number, end: number }[]>([]);
 
     const fetchAvailability = async (date: Date) => {
-        const dateStr = date.toISOString().split('T')[0];
+        // Fix: Use local date components to avoid UTC shifting
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        const dateStr = `${year}-${month}-${day}`;
         const { data, error } = await supabase
             .from('appointments')
             .select('time, duration_minutes')
@@ -732,14 +731,21 @@ const Booking = () => {
                         type="text"
                         value={clientData.name}
                         onChange={e => {
-                            // Prevent double spaces while typing
-                            const val = e.target.value.replace(/\s{2,}/g, ' ');
+                            // 1. Convert to Uppercase
+                            let val = e.target.value.toUpperCase();
+
+                            // 2. Strict whitelist: Only Letters and Spaces (Spanish accents included)
+                            val = val.replace(/[^A-ZÁÉÍÓÚÑ\s]/g, '');
+
+                            // 3. Prevent double spaces
+                            val = val.replace(/\s{2,}/g, ' ');
+
                             setClientData({ ...clientData, name: val });
                             if (errors.name) setErrors({ ...errors, name: '' });
                         }}
                         onBlur={() => setClientData(prev => ({ ...prev, name: prev.name.trim() }))}
                         className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.name ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
-                        placeholder="Tu Nombre"
+                        placeholder="TU NOMBRE"
                     />
                     {errors.name && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.name}</p>}
                 </div>
@@ -749,9 +755,22 @@ const Booking = () => {
                         type="email"
                         value={clientData.email}
                         onChange={e => {
-                            // Prevent spaces
-                            const val = e.target.value.replace(/\s/g, '');
+                            let val = e.target.value;
+
+                            // 1. Convertir a minúsculas inmediatamente
+                            val = val.toLowerCase();
+
+                            // 2. FILTRO DE SEGURIDAD (Lista Blanca)
+                            // Reemplaza cualquier caracter que NO sea:
+                            // a-z (letras inglesas, sin ñ)
+                            // 0-9 (números)
+                            // @ . _ - + (símbolos estándar de email)
+                            val = val.replace(/[^a-z0-9@._\-+]/g, '');
+
+                            // Actualizar el estado
                             setClientData({ ...clientData, email: val });
+
+                            // Limpiar error si existe
                             if (errors.email) setErrors({ ...errors, email: '' });
                         }}
                         className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.email ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
@@ -786,13 +805,19 @@ const Booking = () => {
                     <textarea
                         value={clientData.reason}
                         onChange={e => {
-                            const sanitized = sanitizeInput(e.target.value);
-                            setClientData({ ...clientData, reason: sanitized });
+                            // 1. Convert to Uppercase
+                            let val = e.target.value.toUpperCase();
+
+                            // 2. Strict whitelist: Alphanumeric + Spaces (No symbols like < > / @ etc)
+                            // Allowed: A-Z, 0-9, ÁÉÍÓÚÑ, Space
+                            val = val.replace(/[^A-Z0-9ÁÉÍÓÚÑ\s]/g, '');
+
+                            setClientData({ ...clientData, reason: val });
                             if (errors.reason) setErrors({ ...errors, reason: '' });
                         }}
                         className={`w-full bg-gray-50 border rounded-xl px-4 py-3 outline-none transition-all ${errors.reason ? 'border-red-500 bg-red-50' : 'border-transparent focus:border-gold-500 focus:bg-white'}`}
                         rows={3}
-                        placeholder="Describa brevemente su caso..."
+                        placeholder="DESCRIBA BREVEMENTE SU CASO..."
                     />
                     {errors.reason && <p className="text-red-500 text-sm mt-1 flex items-center gap-1"><AlertCircle size={14} /> {errors.reason}</p>}
                 </div>
