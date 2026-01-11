@@ -1,0 +1,42 @@
+name: Development Deploy
+
+on:
+  push:
+    branches: [ "develop" ]
+
+jobs:
+  deploy-dev:
+    name: Deploy to Development
+    runs-on: self-hosted
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: Deploy Dev Environment
+        env:
+          CONTAINER_NAME: tu-abogado-frontend-dev
+          HOST_PORT: 3001
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL_DEV }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_KEY_DEV }}
+          VITE_RESEND_LINK: ${{ secrets.RESEND_LINK_DEV }}
+          VITE_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY_DEV }}
+        run: |
+          echo "🚀 Starting DEV Deployment on Port $HOST_PORT..."
+          
+          # Detenemos solo el contenedor de desarrollo anterior
+          echo "⬇️  Stopping Dev container..."
+          # Usamos -p para definir un nombre de proyecto distinto y que no choque con prod
+          sudo -E docker-compose -p tu_abogado_dev down --remove-orphans || true
+          
+          echo "🏗️  Building and Starting Dev..."
+          # sudo -E preserva las variables de entorno definidas arriba para que docker-compose las lea
+          sudo -E docker-compose -p tu_abogado_dev up -d --build
+          
+          echo "🧹 Pruning unused images..."
+          docker image prune -f
+
+          echo "✅ Deployment Development Complete!"
