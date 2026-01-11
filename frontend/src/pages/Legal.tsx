@@ -13,7 +13,7 @@ const Legal = () => {
     const activeSection = section || 'terms';
 
     // Determine language (default to 'es' if not 'en')
-    const lang = i18n.language.startsWith('en') ? 'en' : 'es';
+    const lang = i18n.language.startsWith('es') ? 'en' : 'es';
 
     // Validate section matches available keys
     const validSections = ['terms', 'privacy', 'refunds'];
