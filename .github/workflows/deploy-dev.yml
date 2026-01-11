@@ -24,17 +24,20 @@ jobs:
           VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_KEY_DEV }}
           VITE_RESEND_LINK: ${{ secrets.RESEND_LINK_DEV }}
           VITE_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY_DEV }}
+          
         run: |
+          echo "📂 Debugging: Listando archivos en el directorio actual:"
+          ls -la
+          
           echo "🚀 Starting DEV Deployment on Port $HOST_PORT..."
           
-          # Detenemos solo el contenedor de desarrollo anterior
           echo "⬇️  Stopping Dev container..."
-          # Usamos -p para definir un nombre de proyecto distinto y que no choque con prod
-          sudo -E docker-compose -p tu_abogado_dev down --remove-orphans || true
+          # Agregamos -f docker-compose.yml explícitamente
+          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev down --remove-orphans || true
           
           echo "🏗️  Building and Starting Dev..."
-          # sudo -E preserva las variables de entorno definidas arriba para que docker-compose las lea
-          sudo -E docker-compose -p tu_abogado_dev up -d --build
+          # Agregamos -f docker-compose.yml explícitamente
+          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev up -d --build
           
           echo "🧹 Pruning unused images..."
           docker image prune -f
