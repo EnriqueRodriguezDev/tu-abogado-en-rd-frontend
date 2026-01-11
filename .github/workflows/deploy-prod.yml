@@ -25,15 +25,20 @@ jobs:
           VITE_RESEND_LINK: ${{ secrets.RESEND_LINK_PROD }}
           VITE_RESEND_API_KEY: ${{ secrets.RESEND_API_KEY_PROD }}
         run: |
-          echo "🚀 Starting PROD Deployment on Port $HOST_PORT..."
+          echo "📂 Debugging: Listando archivos en el directorio actual:"
+          ls -la
           
-          echo "⬇️  Stopping Prod container..."
-          sudo -E docker-compose -p tu_abogado_prod down --remove-orphans || true
+          echo "🚀 Starting DEV Deployment on Port $HOST_PORT..."
           
-          echo "🏗️  Building and Starting Prod..."
-          sudo -E docker-compose -p tu_abogado_prod up -d --build
+          echo "⬇️  Stopping Dev container..."
+          # Agregamos -f docker-compose.yml explícitamente
+          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev down --remove-orphans || true
           
-          echo "🧹 Pruning..."
+          echo "🏗️  Building and Starting Dev..."
+          # Agregamos -f docker-compose.yml explícitamente
+          sudo -E docker-compose -f docker-compose.yml -p tu_abogado_dev up -d --build
+          
+          echo "🧹 Pruning unused images..."
           docker image prune -f
 
-          echo "✅ Deployment Production Complete!"
+          echo "✅ Deployment Development Complete!"
