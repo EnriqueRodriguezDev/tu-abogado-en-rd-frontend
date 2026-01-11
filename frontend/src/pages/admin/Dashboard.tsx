@@ -392,7 +392,7 @@ const Dashboard = () => {
                             <div className="grid grid-cols-2 gap-3 text-sm">
                                 <div className="bg-gray-50 dark:bg-navy-900 p-3 rounded-xl">
                                     <span className="text-xs text-gray-400 uppercase font-bold block mb-1">Servicio</span>
-                                    <span className="font-medium text-navy-700 dark:text-gray-300">{apt.meeting_type}</span>
+                                    <span className="font-medium text-navy-700 dark:text-gray-300 capitalize">{apt.meeting_type === 'whatsapp' ? 'WhatsApp' : apt.meeting_type}</span>
                                 </div>
                                 <div className="bg-gray-50 dark:bg-navy-900 p-3 rounded-xl">
                                     <span className="text-xs text-gray-400 uppercase font-bold block mb-1">Pago</span>
@@ -412,7 +412,8 @@ const Dashboard = () => {
                                         </button>
                                     </>
                                 )}
-                                <a href={generateWhatsAppLink(apt.client_phone, apt.client_name, apt.date, apt.time)} target="_blank" className="p-2.5 bg-green-50 text-green-600 rounded-xl">
+                                <span className="text-xs text-gray-700">{apt.client_phone}</span>
+                                <a href={generateWhatsAppLink(apt.client_phone, apt.client_name, apt.date, apt.time)} target="_blank" className="p-2.5 bg-green-50 text-green-800 rounded-xl">
                                     <MessageCircle size={16} />
                                 </a>
                                 <button onClick={() => handleViewInvoice(apt, apt.payments[0])} className="p-2.5 bg-gray-100 text-gray-600 rounded-xl">
@@ -459,8 +460,11 @@ const Dashboard = () => {
                                                 )}
                                                 <div className="flex items-center gap-1 mt-1">
                                                     <Tooltip content="Contactar Cliente">
-                                                        <a href={generateWhatsAppLink(apt.client_phone, apt.client_name, apt.date, apt.time)} target="_blank" className="text-xs text-green-600 flex items-center gap-1 hover:underline">
-                                                            <MessageCircle size={12} /> {apt.client_phone}
+                                                        <a href={generateWhatsAppLink(apt.client_phone, apt.client_name, apt.date, apt.time)} target="_blank" className="text-xs text-green-600 flex flex-col items-start gap-1 hover:underline mt-1">
+                                                            <div className="flex items-center gap-1 font-bold">
+                                                                <MessageCircle size={12} /> WhatsApp
+                                                            </div>
+                                                            <span className="ml-4">{apt.client_phone}</span>
                                                         </a>
                                                     </Tooltip>
                                                 </div>
@@ -488,7 +492,7 @@ const Dashboard = () => {
                                     </td>
                                     <td className="p-6">
                                         <div className="font-medium text-gray-600 dark:text-gray-300">Asesoría Legal</div>
-                                        <div className="text-xs text-gray-400">{apt.duration_minutes} mins / {apt.meeting_type}</div>
+                                        <div className="text-xs text-gray-400">{apt.duration_minutes} mins / <span className="capitalize">{apt.meeting_type === 'whatsapp' ? 'WhatsApp' : apt.meeting_type}</span></div>
                                     </td>
                                     <td className="p-6">
                                         <div className="flex items-center gap-2">
