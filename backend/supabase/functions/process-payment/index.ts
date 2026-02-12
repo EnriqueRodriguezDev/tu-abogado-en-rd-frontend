@@ -119,12 +119,17 @@ serve(async (req) => {
                 meeting_type: appointmentData.meeting_type,
                 status: paymentStatus === 'confirmed' ? 'confirmed' : 'pending',
                 client_name: appointmentData.client_name,
-                client_email: appointmentData.client_email,
-                client_phone: appointmentData.client_phone,
+                client_email: appointmentData.client_email || null,
+                client_phone: appointmentData.client_phone || null,
+                client_country_iso: appointmentData.client_country_iso || 'DO',
+                client_dial_code: appointmentData.client_dial_code || '+1',
+                notify_via_email: appointmentData.notify_via_email ?? true,
+                notify_via_whatsapp: appointmentData.notify_via_whatsapp ?? true,
                 reason: appointmentData.reason,
                 total_price: appointmentData.total_price,
                 appointment_code: appointmentCode,
-                lawyer_id: assignedLawyerId
+                lawyer_id: assignedLawyerId,
+                service_id: appointmentData.service_id || null
             }])
             .select().single();
 

@@ -38,6 +38,7 @@ export interface ServiceVariant {
     service_id: string;
     name_es: string;
     name_en: string;
+    description: string;
     duration_minutes: number;
     price_usd: number;
     price_dop: number;
@@ -79,6 +80,10 @@ export interface ClientData {
     name: string;
     email: string;
     phone: string;
+    country_iso: string;
+    dial_code: string;
+    notify_email: boolean;
+    notify_whatsapp: boolean;
     reason: string;
     rnc?: string;
 }
@@ -108,14 +113,18 @@ export interface Appointment {
     meeting_type: 'whatsapp' | 'meet';
     status: string;
     client_name: string;
-    client_email: string;
-    client_phone: string;
+    client_email: string | null;
+    client_phone: string | null;
+    client_country_iso: string;
+    client_dial_code: string;
     reason: string;
     total_price: number;
     appointment_code?: string;
     lawyer_id?: string;
     lawyer?: Lawyer;
     service_id?: string;
+    notify_via_email: boolean;
+    notify_via_whatsapp: boolean;
 }
 
 export type AppointmentInsert = Omit<Appointment, 'id' | 'created_at'>;
