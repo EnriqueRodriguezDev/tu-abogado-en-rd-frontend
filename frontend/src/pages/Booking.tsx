@@ -1,7 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '../supabaseClient';
-import * as LucideIcons from 'lucide-react'
+//import * as LucideIcons from 'lucide-react'
 import {
     Calendar as CalendarIcon,
     Clock,
@@ -54,6 +54,7 @@ const COUNTRIES = [
     { code: 'CH', label: 'Suiza', dial: '+41', flag: '🇨🇭', mask: '## ### ## ##', digits: 9 },
 ];
 
+/*
 const getServiceIcon = (iconName: string | null) => {
     if (!iconName) return <LucideIcons.Briefcase size={32} />;
 
@@ -64,6 +65,7 @@ const getServiceIcon = (iconName: string | null) => {
     const IconComponent = LucideIcons[formattedName] || LucideIcons.Briefcase;
     return <IconComponent size={32} />;
 };
+*/
 
 const Booking = () => {
     // --- REFS ---
