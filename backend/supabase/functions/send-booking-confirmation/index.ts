@@ -5,7 +5,7 @@ const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 
 interface Appointment {
     client_name: string;
-    client_email: string;
+    client_email: string | null;
     date: string;
     time: string;
     duration_minutes: number;
@@ -162,6 +162,12 @@ const handler = async (req: Request): Promise<Response> => {
     try {
         const { appointment, payment } = await req.json();
         if (!appointment || !payment) throw new Error("Missing data [appointment, payment]");
+
+        // Skip email if no email or notify_via_email is false
+        if (!appointment.client_email || appointment.notify_via_email === false) {
+            console.log('Skipping email: no client_email or notify_via_email is false');
+            return new Response(JSON.stringify({ skipped: true, reason: 'no_email_or_opted_out' }), { status: 200, headers: { ...headers, "Content-Type": "application/json" } });
+        }
 
         const res = await fetch("https://api.resend.com/emails", {
             method: "POST",

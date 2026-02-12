@@ -33,7 +33,7 @@ const Navbar = () => {
     const isActive = (path: string) => location.pathname === path;
 
     return (
-        <nav className="bg-navy-900 text-white shadow-lg sticky top-0 z-50 pt-safe transition-all duration-300">
+        <nav className="bg-navy-900 text-white shadow-lg sticky top-0 z-[120] pt-safe transition-all duration-300">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex justify-between h-16">
                     <div className="flex items-center">
@@ -41,7 +41,7 @@ const Navbar = () => {
                             <Scale className="h-7 w-7 text-gold-500" />
                             <div className="flex flex-col">
                                 <span className="font-serif text-2xl font-bold tracking-wide leading-none">TuAbogadoEnRD</span>
-                                <span className="text-[15px] text-gray-300 uppercase tracking-wider">Asesoría Legal Dominicana</span>
+                                {/*<span className="text-[15px] text-gray-300 uppercase tracking-wider">Asesoría Legal Dominicana</span>*/}
                             </div>
                         </Link>
                     </div>
@@ -88,7 +88,7 @@ const Navbar = () => {
 
             {/* Mobile Menu Drawer (Overlay) */}
             <div
-                className={`fixed inset-0 z-[60] md:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+                className={`fixed inset-0 z-[110] transition-opacity duration-300 ${isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
                     }`}
             >
                 {/* Backdrop */}

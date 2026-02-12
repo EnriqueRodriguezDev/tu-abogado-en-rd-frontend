@@ -178,17 +178,7 @@ const ServicesManager = () => {
 
     // Auto-trigger translation when switching tabs if content is missing
     // Auto-trigger translation when switching tabs if content is missing
-    useEffect(() => {
-        if (activeTab === 'en') {
-            if ((name && !nameEn) || (description && !descriptionEn) || (content && !contentEn)) {
-                handleTranslate('en');
-            }
-        } else {
-            if ((nameEn && !name) || (descriptionEn && !description) || (contentEn && !content)) {
-                handleTranslate('es');
-            }
-        }
-    }, [activeTab, name, nameEn, description, descriptionEn, content, contentEn, handleTranslate]);
+
 
     const handleAddVariant = () => {
         setVariants([...variants, {
@@ -555,19 +545,29 @@ const ServicesManager = () => {
                                 </button>
                             </div>
 
-                            <div className="flex bg-gray-100 dark:bg-navy-800 rounded-lg p-1">
+                             <div className="flex items-center gap-2">
+                                <div className="flex bg-gray-100 dark:bg-navy-800 rounded-lg p-1">
+                                    <button
+                                        onClick={() => setActiveTab('es')}
+                                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'es' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-gold-500 shadow-sm' : 'text-gray-500 hover:text-navy-900 dark:hover:text-white'}`}
+                                    >
+                                        Español
+                                    </button>
+                                    <button
+                                        onClick={() => setActiveTab('en')}
+                                        className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'en' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-gold-500 shadow-sm' : 'text-gray-500 hover:text-navy-900 dark:hover:text-white'}`}
+                                    >
+                                        English
+                                    </button>
+                                </div>
                                 <button
-                                    onClick={() => setActiveTab('es')}
-                                    className={`px-4 py-2 rounded-md text-sm font-bold transition-all ${activeTab === 'es' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-gold-500 shadow-sm' : 'text-gray-500 hover:text-navy-900 dark:hover:text-white'}`}
+                                    type="button"
+                                    onClick={() => handleTranslate(activeTab)}
+                                    disabled={translating}
+                                    className="p-2 rounded-lg text-gold-500 hover:bg-gold-50 dark:hover:bg-navy-800 transition-all border border-transparent hover:border-gold-200"
+                                    title={activeTab === 'es' ? "Traducir desde Inglés" : "Traducir desde Español"}
                                 >
-                                    Español
-                                </button>
-                                <button
-                                    onClick={() => setActiveTab('en')}
-                                    className={`px-4 py-2 rounded-md text-sm font-bold transition-all flex items-center gap-2 ${activeTab === 'en' ? 'bg-white dark:bg-navy-700 text-navy-900 dark:text-gold-500 shadow-sm' : 'text-gray-500 hover:text-navy-900 dark:hover:text-white'}`}
-                                >
-                                    English
-                                    {translating && <Loader2 size={12} className="animate-spin" />}
+                                    {translating ? <Loader2 size={20} className="animate-spin" /> : <Sparkles size={20} />}
                                 </button>
                             </div>
 
